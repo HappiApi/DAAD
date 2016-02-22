@@ -5,11 +5,11 @@ import json
 def getJSON(path):
 
 	def conv_str(string):
-		str_tup = list( map(lambda x: tuple(x.strip('()')), string.replace('),', ')#').split('#')) )
-		return [(float(x[0]),float(x[2])) for x in str_tup]
+		return list(map(lambda x: tuple(map(float, x.strip('() ').split(','))), string.replace('),', ')#').split('#')) )
+	
 
 	with open(path, 'r') as f:
-		text = f.read().split('\n')[0:2]
+		text = f.read().split('\n')
 		obj = { x[0]: conv_str(x[1]) for x in map(lambda x: x.replace(' ','').split(':'), text) }
 		return json.dumps(obj, sort_keys=True)
 
