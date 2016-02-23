@@ -4,7 +4,7 @@ to solve specific classes better than the 'textbook' algorithm
 ## Star-shaped polygons
 the whole interior is visible from a single point, without crossing any edge. The polygon must be simple, and may be convex or concave.
 
-Kernel is the the area of all the points point in a star shaped polygon where you can 'see' everything (edges and vertices)
+Kernel is the the area of all the points in a star shaped polygon where you can 'see' everything (edges and vertices)
 
 [Wikipedia](https://en.wikipedia.org/wiki/Star-shaped_polygon)
 
@@ -28,3 +28,13 @@ for computing visibility polygon (correction of Lee's linear algorithm 1979, in 
 Convex Polygon - No interior angle > 180 deg  
 Concave Polygon - At least one interior angle > 180 deg  
 Simple: the boundary of the polygon does not cross itself. All convex polygons are simple.
+
+### Our Algorithm (so-far)
+
+1.Triangulate The Polygon  
+2.Colour Vertices of Polygon  
+3.Compute star-shaped polygon  
+4.Find a point in Kernel of polygon  
+5.For each star polygon find visibility polygon from the point found above  
+6.If a visibility polygon is overlapped entirely (proper subset) then remove guard.   
+
