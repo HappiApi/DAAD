@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 
 polygons = json.loads(parse.getJSON('guards.pol.txt'))
 
-#triangulate and display comparison before and after
-def t(points_array):
+#triangulate and returns (orginal, triangulated) tuple
+def triangulate(points_array):
 
 	def ccw_segments(points_array):
 		length = len(points_array) -1
@@ -22,12 +22,15 @@ def t(points_array):
 		ret.append([length, 0])
 		return ret
 
-	A = dict(vertices=np.array(points_array), segments=ccw_segments(points_array))
-	B = triangle.triangulate(A, 'p')
-	# pdb.set_trace()
-	triangle.plot.compare(plt, A, B)
+	input_dict = dict(vertices=np.array(points_array), segments=ccw_segments(points_array))
+	tri = triangle.triangulate(input_dict, 'p')
+
+	return {'original':input_dict, 'tri':tri}
+
+def show_tri(dic):
+	triangle.plot.compare(plt, dic['original'], dic['tri'])
 	plt.show()
 
-def triangulate(polygon_no):
-	t(polygons[str(polygon_no)])
+def t(polygon_no):
+	show_tri(triangulate(polygons[str(polygon_no)]))
 
