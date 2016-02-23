@@ -70,26 +70,13 @@ function getIntersection(ray,segment){
 function getSightPolygon(sightX,sightY, segments){
 
 	// Get all unique points
-	var points = (function(segments){
-		var a = [];
-		segments.forEach(function(seg){
-			a.push(seg.a,seg.b);
-		});
-		return a;
-	})(segments);
-	var uniquePoints = (function(points){
-		var set = {};
-		return points.filter(function(p){
-			var key = p.x+","+p.y;
-			if(key in set){
-				return false;
-			}else{
-				set[key]=true;
-				return true;
-			}
-		});
-	})(points);
-
+  var uniquePoints = _(segments)
+      .map(function(segment) {
+        return [segment.a, segment.b];
+      })
+      .flatten()
+      .uniq()
+      .value();
 	// Get all angles
 	var uniqueAngles = [];
 	for(var j=0;j<uniquePoints.length;j++){
@@ -168,7 +155,7 @@ function getSightPolygon(sightX,sightY, segments){
 			{
 				if (intersect.x == sightX && intersect.y == sightY)
 				{
-					console.log("Collided Vertex");
+					// console.log("Collided Vertex");
 				}
 				else
 				{
