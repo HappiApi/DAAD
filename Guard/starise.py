@@ -1,4 +1,3 @@
-import pulp
 
 colourList = [1, 2, 3, 2, 1, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 2, 1, 3, 2, 3, 1, 3]
 
@@ -198,12 +197,6 @@ for x in xrange(0,len(starShapedPolygons)):
 	
 
 	pass
-
-
-
-
-
-
 
 
 
