@@ -27,10 +27,13 @@ var context = canvas.node().getContext("2d");
 var polygon = [];
 var guards = [];
 var mouseGuard = null;
+var i = 1;
 
-daah.getGuards().then(function(maps) {
-  window.maps = maps;
-  setPolygon(maps[26]);
+
+daah.getCheck().then(function(data) {
+  window.data = data;
+  setPolygon(data[i].map);
+  setGuards(data[i].guards);
 });
 
 function mousemove() {
@@ -40,7 +43,7 @@ function mousemove() {
     y.invert(mouse[1])
   ]
   mouseGuard = coords;
-  draw();
+  redraw = true;
 }
 
 function mouseleave() {
@@ -53,7 +56,7 @@ function click() {
 }
 
 function zoom() {
-  draw();
+  redraw = true;
 }
 
 function drawPolygon(polygon) {
@@ -134,14 +137,23 @@ function evenAspectRatio(xScale, yScale) {
   ]);
 }
 
+var redraw = true;
+
 function draw() {
-  context.clearRect(0, 0, width, height);
-  var allGuards = _.clone(guards);
-  if (mouseGuard) allGuards.push(mouseGuard);
-  drawPolygon(polygon);
-  drawSightPolygons(allGuards);
-  drawGuards(allGuards);
+  if (redraw) {
+    context.clearRect(0, 0, width, height);
+    var allGuards = _.clone(guards);
+    if (mouseGuard) allGuards.push(mouseGuard);
+    drawPolygon(polygon);
+    drawSightPolygons(allGuards);
+    drawGuards(allGuards);
+    redraw = false;
+  }
+  window.requestAnimationFrame(draw);
 }
+
+draw();
+
 
 function setPolygon(newPolygon) {
   polygon = newPolygon;
@@ -154,5 +166,23 @@ function setPolygon(newPolygon) {
   evenAspectRatio(x, y);
   zoomBehavior.x(x)
   zoomBehavior.y(y);
-  draw();
+  redraw = true;
 }
+
+function setGuards(newGuards) {
+  guards = newGuards;
+  redraw = true;
+}
+
+window.addEventListener("keydown", function(event) {
+  if (event.keyCode == 39) {
+    i++;
+  }
+  if (event.keyCode == 37) {
+    i--;
+    redraw = true;
+  }
+  event.preventDefault();
+  setPolygon(data[i].map)
+  setGuards(data[i].guards);
+})

@@ -17,18 +17,37 @@ function parsePoints(text) {
 //   "1:(0,0),(0,1),(1,1)"
 // into format
 //   [ "1", [[0,0], [0,1], [1,1]] ]
-function parseLine(line) {
-  var pair = removeAllSpaces(line).split(":")
+function parseGaurdsLine(line) {
+  var pair = removeAllSpaces(line).split(":");
   return [
     pair[0],
-    parsePoints(pair[1])
+    { map: parsePoints(pair[1]) }
+  ];
+}
+
+function parseCheckLine(line) {
+  var pair = removeAllSpaces(line).split(":");
+  var a = pair[1].split(";");
+  return [
+    pair[0],
+    {
+      map: parsePoints(a[0]),
+      guards: parsePoints(a[1])
+    }
   ];
 }
 
 // Returns guards.pol into the format { '1': [[0,0], [0,1], [2,2]] }
 daah.getGuards = function() {
   return daah.getText("txt/guards.pol.txt").then(function(text) {
-    var pairs = text.split("\n").map(parseLine);
+    var pairs = text.split("\n").map(parseGaurdsLine);
+    return _.fromPairs(pairs);
+  });
+};
+
+daah.getCheck = function() {
+  return daah.getText("txt/check.pol.txt").then(function(text) {
+    var pairs = text.split("\n").map(parseCheckLine);
     return _.fromPairs(pairs);
   });
 };
