@@ -48,6 +48,7 @@ function mouseleave() {
 }
 
 function click() {
+  if (d3.event.defaultPrevented) return;
   guards.push(_.clone(mouseGuard));
 }
 

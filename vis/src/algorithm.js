@@ -14,7 +14,7 @@ function edges(array) {
 
 function convertToSegments(polygon) {
   var p = _.clone(polygon);
-  p.push(polygon[0]);
+  if (p.length) p.push(polygon[0]);
   var points = p.map(function(d) {
     return { x: d[0], y: d[1] };
   });
