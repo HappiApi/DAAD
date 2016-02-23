@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import d3 from 'd3';
+import alg from './algorithm.js';
+import parser from './parse.js';
 
 function getSlopes(line1, line2) {
   let m1, m2;
@@ -81,14 +84,23 @@ function algorithm(polygon, guards) {
   let visibility_polygons = [];
   let rays = [];
 
-  for(let i = 0; i < guard.length; i++) {
-    visibility_polygons.push(calculateRays(polygon, vertices, rays));
+  for(let i = 0; i < guards.length; i++) {
+    visibility_polygons.push(calculateRays(polygon, vertices, rays, guard[i]));
   }
-  check_potential_areas(visibility_polygons, vertices);
+  return check_potential_areas(visibility_polygons, vertices);
 }
 
+function main() {
+  parser.getCheck().then(function(data) {
+    for(var key in data) {
+      result = algorithm(data[key].map, data[key].guards);
+      if(result !== null) {
+        console.log(key + ': (' + result[0] + ', ' + result[1] + ')');
+      } else {
+        console.log(key + ": The entire area is covered");
+      }
+    }
+  });
+}
 
-
-
-// For every vertex in polygon, set seen to false
-// Store visible vertices
+main();
