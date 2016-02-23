@@ -101,11 +101,11 @@ def colourVertices(adjMat, numOfColours):
 
 	if doIt(adjMat, numOfColours, colours, 0) != True:
 		print("Didn't work")
-		return False
+		# return False
 		pass
 	else:
 		print(colours)
-		return True
+		# return True
 
 	return colours
 
