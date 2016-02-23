@@ -1,6 +1,4 @@
 
-numberOfVertices = 30
-
 graph = [[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], #1
 		
 		[1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], #2
@@ -64,43 +62,44 @@ graph = [[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], #1
 		
 		]
 
-numberOfColour = 3
-
-def isSafe(vertexToColour, adjMat, colours, colour):
-	for x in xrange(0,numberOfVertices):
-		if adjMat[vertexToColour][x]:
-			if colour == colours[x]:
-				return False
-				pass
-			pass
-		pass
-
-	return True
-
-
-def doIt(adjMat, numOfColours, colours, vertexToColour):
-	if (vertexToColour == numberOfVertices):
-		return True
-		pass
-
-	for x in xrange(1, numOfColours+1):
-		if isSafe(vertexToColour, adjMat, colours, x):
-			colours[vertexToColour] = x
-
-			if doIt(adjMat, numOfColours, colours, vertexToColour+1) == True:
-				return True
-				pass
-
-			colours[vertexToColour] = 0
-			pass
-		pass
-
-	return False
-
 def colourVertices(adjMat, numOfColours):
-	colours = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] #Needs to be the number of vertices
+	# Needs to be the number of vertices.
+	# Should work now
+	numberOfVertices = len(adjMat) 
+	colours = [0] * numberOfVertices
 
-	if doIt(adjMat, numberOfColour, colours, 0) != True:
+	def isSafe(vertexToColour, adjMat, colours, colour):
+		for x in range(0,numberOfVertices):
+			if adjMat[vertexToColour][x]:
+				if colour == colours[x]:
+					return False
+					pass
+				pass
+			pass
+
+		return True
+
+	def doIt(adjMat, numOfColours, colours, vertexToColour):
+		if (vertexToColour == numberOfVertices):
+			return True
+			pass
+
+		for x in range(1, numOfColours+1):
+			if isSafe(vertexToColour, adjMat, colours, x):
+				colours[vertexToColour] = x
+
+				if doIt(adjMat, numOfColours, colours, vertexToColour+1) == True:
+					return True
+					pass
+
+				colours[vertexToColour] = 0
+				pass
+			pass
+
+		return False
+
+
+	if doIt(adjMat, numOfColours, colours, 0) != True:
 		print("Didn't work")
 		return False
 		pass
@@ -108,5 +107,6 @@ def colourVertices(adjMat, numOfColours):
 		print(colours)
 		return True
 
+	#return colours
 
-colourVertices(graph, numberOfColour)
+colourVertices(graph, 3)
