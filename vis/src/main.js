@@ -143,8 +143,6 @@ function draw() {
   drawGuards(allGuards);
 }
 
-d3.select("window")
-
 function setPolygon(newPolygon) {
   polygon = newPolygon;
   zoomBehavior.translate([0,0]);
