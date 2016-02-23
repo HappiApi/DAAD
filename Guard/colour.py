@@ -107,6 +107,6 @@ def colourVertices(adjMat, numOfColours):
 		print(colours)
 		return True
 
-	#return colours
+	return colours
 
 colourVertices(graph, 3)

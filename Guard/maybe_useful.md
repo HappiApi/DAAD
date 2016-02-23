@@ -31,7 +31,7 @@ Simple: the boundary of the polygon does not cross itself. All convex polygons a
 
 ### Our Algorithm (so-far)
 
-1.Triangulate The Polygon  
+1.Triangulate The Polygon  (constrained delaunay triangulation)
 2.Colour Vertices of Polygon  
 3.Compute star-shaped polygon  
 4.Find a point in Kernel of polygon  
