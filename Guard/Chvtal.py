@@ -11,6 +11,8 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
+import colour
+
 polygons = json.loads(parse.getJSON('guards.pol.txt'))
 
 #triangulate and returns (orginal, triangulated) tuple
@@ -34,3 +36,30 @@ def show_tri(dic):
 def t(polygon_no):
 	show_tri(triangulate(polygons[str(polygon_no)]))
 
+# Get adjacency matrix for one polygon
+def adj_matrix(tri_data):
+	triangles = tri_data['tri']['triangles']
+	vertices_no = len(tri_data['tri']['vertices'])
+	adj_mat = []
+
+	def constr_adjrow(adjVertIndices):
+		init_list = [0] * vertices_no
+		for index in adjVertIndices:
+			init_list[index] = 1
+		return init_list
+	# For each vertex index
+	for vertex_index in range(vertices_no):
+		adj_vertices = set()
+		# Get all triangles containing vertex index 
+		for triangle in triangles:
+			if vertex_index in triangle:
+				# Each vertex index in triangle
+				for index in triangle :
+					if vertex_index != index:
+						adj_vertices.add(index)
+
+		adj_mat.append(constr_adjrow(adj_vertices))
+
+	return adj_mat
+
+am = adj_matrix(triangulate(polygons['3']))
