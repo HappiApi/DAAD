@@ -18,16 +18,19 @@ var canvas = d3.select("body").append("canvas")
     .attr("width", width)
     .attr("height", height)
     .call(zoomBehavior)
-    .on("mousemove", mousemove);
+    .on("mousemove", mousemove)
+    .on("mouseleave", mouseleave)
+    .on("click", click);
 
 var context = canvas.node().getContext("2d");
 
 var polygon = [];
 var guards = [];
+var mouseGuard = null;
 
 daah.getGuards().then(function(maps) {
   window.maps = maps;
-  setPolygon(maps[30]);
+  setPolygon(maps[26]);
 });
 
 function mousemove() {
@@ -36,15 +39,23 @@ function mousemove() {
     x.invert(mouse[0]),
     y.invert(mouse[1])
   ]
-  guards = [coords];
+  mouseGuard = coords;
   draw();
+}
+
+function mouseleave() {
+  mouseGuard = null;
+}
+
+function click() {
+  guards.push(_.clone(mouseGuard));
 }
 
 function zoom() {
   draw();
 }
 
-function drawPolygon() {
+function drawPolygon(polygon) {
 
   context.fillStyle = "black";
   context.fillRect(0,0,width,height);
@@ -67,18 +78,18 @@ function drawPolygonPath(polygon) {
   context.closePath();
 }
 
-function drawGuards() {
+function drawGuards(guards) {
   context.save();
-  context.beginPath();
   guards.forEach(function(coords) {
+    context.beginPath();
     context.arc(x(coords[0]), y(coords[1]), 3, 0, 2*Math.PI);
+    context.fillStyle = "#922";
+    context.fill();
   });
-  context.fillStyle = "#922";
-  context.fill();
   context.restore();
 }
 
-function drawSightPolygons() {
+function drawSightPolygons(guards) {
   var sightPolygons = guards.map(function(d) {
     return daah.getSightPolygon(d[0], d[1], polygon);
   });
@@ -124,9 +135,11 @@ function evenAspectRatio(xScale, yScale) {
 
 function draw() {
   context.clearRect(0, 0, width, height);
-  drawPolygon();
-  drawSightPolygons();
-  drawGuards();
+  var allGuards = _.clone(guards);
+  if (mouseGuard) allGuards.push(mouseGuard);
+  drawPolygon(polygon);
+  drawSightPolygons(allGuards);
+  drawGuards(allGuards);
 }
 
 d3.select("window")
