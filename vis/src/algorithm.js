@@ -67,7 +67,8 @@ function getIntersection(ray,segment){
 	};
 }
 
-function getSightPolygon(sightX,sightY,segments){
+function getSightPolygon(sightX,sightY, segments){
+
 	// Get all unique points
 	var points = (function(segments){
 		var a = [];
@@ -88,45 +89,126 @@ function getSightPolygon(sightX,sightY,segments){
 			}
 		});
 	})(points);
+
 	// Get all angles
 	var uniqueAngles = [];
 	for(var j=0;j<uniquePoints.length;j++){
 		var uniquePoint = uniquePoints[j];
 		var angle = Math.atan2(uniquePoint.y-sightY,uniquePoint.x-sightX);
 		uniquePoint.angle = angle;
-		uniqueAngles.push(angle-0.00001,angle,angle+0.00001);
+		uniqueAngles.push(angle-0.0000001,angle,angle+0.0000001);
 	}
+
 	// RAYS IN ALL DIRECTIONS
 	var intersects = [];
 	for(var j=0;j<uniqueAngles.length;j++){
 		var angle = uniqueAngles[j];
+
 		// Calculate dx & dy from angle
 		var dx = Math.cos(angle);
 		var dy = Math.sin(angle);
+
 		// Ray from center of screen to mouse
 		var ray = {
 			a:{x:sightX,y:sightY},
 			b:{x:sightX+dx,y:sightY+dy}
 		};
+
+
+		//Check whether the ray points into the shape.
+		var xToCheck = ray.b.x;
+		var yToCheck = ray.b.y;
+
+		var k;
+		
+		var p1 = {
+			x:0.0,
+			y:0.0
+		};
+
+		var p2 = {
+			x: 0.0,
+			y: 0.0
+		};
+
+		var angle2 = 0.0;
+
+		for (k = 0; k < segments.length;k++)
+		{
+			p1.x = segments[k].a.x - xToCheck;
+		    p1.y = segments[k].a.y - yToCheck;
+		    p2.x = segments[(k+1)%segments.length].a.x - xToCheck;
+		    p2.y = segments[(k+1)%segments.length].a.y - yToCheck;
+
+		    var dtheta = 0.0,theta1 = 0.0,theta2=0.0;
+
+		    theta1 = Math.atan2(p1.y,p1.x);
+		    theta2 = Math.atan2(p2.y,p2.x);
+		    dtheta = theta2 - theta1;
+		    while (dtheta > Math.PI)
+		      dtheta -= Math.PI*2;
+		    while (dtheta < -Math.PI)
+		      dtheta += Math.PI*2;
+
+		    angle2 += dtheta;
+		};
+
+		var isInsideShape = (angle2/Math.PI*2 < 4.1) && (angle2/Math.PI*2 > 3.9);
+
 		// Find CLOSEST intersection
 		var closestIntersect = null;
-		for(var i=0;i<segments.length;i++){
+		var closestIntersectLeftV = null;
+		var closestIntersectRightV = null;
+		for(var i=0;i<segments.length;i++)
+		{
 			var intersect = getIntersection(ray,segments[i]);
+
 			if(!intersect) continue;
-			if(!closestIntersect || intersect.param<closestIntersect.param){
-				closestIntersect=intersect;
+			if(isInsideShape) 
+			{
+				if (intersect.x == sightX && intersect.y == sightY)
+				{
+					console.log("Collided Vertex");
+				}
+				else
+				{
+					if(!closestIntersect || intersect.param<closestIntersect.param)
+					{
+						closestIntersect=intersect;
+					}
+				}
+			}
+			else
+			{
+				if(!closestIntersect || intersect.param<closestIntersect.param)
+				{
+					closestIntersect=intersect;
+				}
 			}
 		}
+
 		// Intersect angle
 		if(!closestIntersect) continue;
 		closestIntersect.angle = angle;
+
 		// Add to list of intersects
 		intersects.push(closestIntersect);
+
 	}
+
+
+
 	// Sort intersects by angle
 	intersects = intersects.sort(function(a,b){
 		return a.angle-b.angle;
 	});
+
+	intersects = intersects.filter(function(a){
+		return !isNaN(a.x);
+	});
+
 	// Polygon is intersects, in order of angle
 	return intersects;
+
 }
+
