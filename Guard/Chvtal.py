@@ -1,6 +1,7 @@
 import parse
 import json
 import pprint
+import sys
 
 import pdb
 
@@ -62,4 +63,43 @@ def adj_matrix(tri_data):
 
 	return adj_mat
 
-am = adj_matrix(triangulate(polygons['3']))
+# def add_colours(tri_data):
+# 	colours = colour.colourVertices(adj_matrix(tri_data), 3)
+# 	pdb.set_trace() 
+
+# 	vertices = tri_data['tri']['vertices'].tolist()
+# 	for vertex,c in zip(vertices, colours):
+# 			vertex = {'coord':vertex, 'colour': c}
+
+def min_colour(colours):
+	c_options = set(colours)
+	count = sys.maxsize
+	colour = None
+	for c in c_options:
+		if colours.count(c) < count:
+			count = colours.count(c)
+			colour = c
+	return c
+
+def getGuards(polygon_no):
+	positions = []
+	data = triangulate(polygons[str(polygon_no)])
+	adj_m = adj_matrix(data)
+	colours = colour.colourVertices(adj_m, 3)
+	c = min_colour(colours)
+	for co, v in zip(colours, data['tri']['vertices']):
+		if co ==c:
+			# print(c,v)
+			positions.append(v.tolist())
+	return positions
+	# pdb.set_trace()
+
+def output(data):
+	with open('test2.pol', 'w') as f:
+		for i in range(1,31):
+			s = str(i) + ": " + ', '.join(map(str,getGuards(i))).replace('[','(').replace(']',')')
+			# pdb.set_trace()
+			f.write(s+'\n')
+		
+
+# getGuards(3)
