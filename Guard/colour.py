@@ -74,6 +74,7 @@ def convertToOne(number):
 	else:
 		return 1
 
+# Takes 2D array of triangulation vertices, 3 and how many vertices in polygon
 def colourVertices(triMat, numOfColours, length):
 	# Needs to be the number of vertices.
 	# Should work now
@@ -87,7 +88,7 @@ def colourVertices(triMat, numOfColours, length):
 
 	coloured = 3
 	while(coloured != numberOfVertices):
-		for x in xrange(0,len(triMat)):
+		for x in range(0,len(triMat)):
 			currentTri = triMat[x]
 
 			vertexOne = currentTri[0]
@@ -103,26 +104,26 @@ def colourVertices(triMat, numOfColours, length):
 			total = convertToOne(vertexOneC) + convertToOne(vertexTwoC) + convertToOne(vertexThreeC)
 
 			if(total == 2):
-				print[colours[vertexOne],colours[vertexTwo],colours[vertexThree]]
+				print([colours[vertexOne],colours[vertexTwo],colours[vertexThree]])
 				if colours[vertexOne] == 0:
 					colours[vertexOne] = 1
 					while (colours[vertexOne] == colours[vertexTwo]) or (colours[vertexOne] == colours[vertexThree]):
 						colours[vertexOne] += 1
-						print[colours[vertexOne]]
+						print([colours[vertexOne]])
 					pass
 
 				if colours[vertexTwo] == 0:
 					colours[vertexTwo] = 1
 					while colours[vertexTwo] == colours[vertexOne] or colours[vertexTwo] == colours[vertexThree]:
 						colours[vertexTwo] += 1
-						print[colours[vertexTwo]]
+						print([colours[vertexTwo]])
 					pass
 
 				if colours[vertexThree] == 0:
 					colours[vertexThree] = 1
 					while colours[vertexThree] == colours[vertexOne] or colours[vertexThree] == colours[vertexTwo]:
 						colours[vertexThree] += 1
-						print[colours[vertexThree]]
+						print([colours[vertexThree]])
 					pass
 				coloured += 1
 			if total != 0:

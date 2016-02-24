@@ -46,6 +46,5 @@ def find_polygons(chosen_colour_list, adj_matrix):
 		polygons.append(polygon_vertices)
 	return polygons
 
-
 ex = [1, 2, 3, 2, 1, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 2, 1, 3, 2, 3, 1, 3]
 
