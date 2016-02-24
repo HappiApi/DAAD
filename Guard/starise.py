@@ -1,3 +1,8 @@
+<<<<<<< Updated upstream
+=======
+import pulp
+import math
+>>>>>>> Stashed changes
 
 colourList = [1, 2, 3, 2, 1, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 2, 1, 3, 2, 3, 1, 3]
 
@@ -191,10 +196,46 @@ def createPolygons():
 setupVars()
 starShapedPolygons = createPolygons()
 
-for x in xrange(0,len(starShapedPolygons)):
-	print(starShapedPolygons[x])
+def isPointInShape(polygon, x, y):
+	angle = 0.0
 
-	
+	print(polygon)
+
+	for j in xrange(0,len(polygon)):
+			p1x = verticesCoordinates[polygon[j]][0] - x
+			p1y = verticesCoordinates[polygon[j]][1] - y
+
+			p2x = verticesCoordinates[polygon[(j+1)%len(polygon)]][0] - x
+			p2y = verticesCoordinates[polygon[(j+1)%len(polygon)]][1] - y
+
+			dtheta = 0.0
+			theta1 = 0.0
+			theta2 = 0.0
+
+			theta1 = math.atan2(p1y, p1x)
+			theta2 = math.atan2(p2y, p2x)
+			dtheta = theta2 - theta1
+			
+			while dtheta > math.pi:
+				dtheta -= math.pi*2
+			pass
+
+			while dtheta < -math.pi:
+				dtheta += math.pi*2
+			pass
+
+			angle += dtheta
+			#print(angle)
+	pass
+
+
+	isInsideShape = (angle/math.pi*2 < 4.1) and (angle/math.pi*2 > 3.9)
+	print(isInsideShape)
+
+for x in xrange(0,len(starShapedPolygons)):
+	#print(starShapedPolygons[x])
+
+	isPointInShape(starShapedPolygons[x], 14, 9)
 
 	pass
 
