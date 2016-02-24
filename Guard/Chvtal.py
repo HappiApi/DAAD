@@ -100,6 +100,3 @@ def output(data):
 			s = str(i) + ": " + ', '.join(map(str,getGuards(i))).replace('[','(').replace(']',')')
 			# pdb.set_trace()
 			f.write(s+'\n')
-		
-
-# getGuards(3)
