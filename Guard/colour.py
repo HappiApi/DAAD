@@ -104,31 +104,31 @@ def colourVertices(triMat, numOfColours, length):
 			total = convertToOne(vertexOneC) + convertToOne(vertexTwoC) + convertToOne(vertexThreeC)
 
 			if(total == 2):
-				print([colours[vertexOne],colours[vertexTwo],colours[vertexThree]])
+				#print([colours[vertexOne],colours[vertexTwo],colours[vertexThree]])
 				if colours[vertexOne] == 0:
 					colours[vertexOne] = 1
 					while (colours[vertexOne] == colours[vertexTwo]) or (colours[vertexOne] == colours[vertexThree]):
 						colours[vertexOne] += 1
-						print([colours[vertexOne]])
+						#print([colours[vertexOne]])
 					pass
 
 				if colours[vertexTwo] == 0:
 					colours[vertexTwo] = 1
 					while colours[vertexTwo] == colours[vertexOne] or colours[vertexTwo] == colours[vertexThree]:
 						colours[vertexTwo] += 1
-						print([colours[vertexTwo]])
+						#print([colours[vertexTwo]])
 					pass
 
 				if colours[vertexThree] == 0:
 					colours[vertexThree] = 1
 					while colours[vertexThree] == colours[vertexOne] or colours[vertexThree] == colours[vertexTwo]:
 						colours[vertexThree] += 1
-						print([colours[vertexThree]])
+						#print([colours[vertexThree]])
 					pass
 				coloured += 1
 			if total != 0:
-				print([vertexOne, vertexTwo, vertexThree, total, coloured])
-
+				#print([vertexOne, vertexTwo, vertexThree, total, coloured])
+				pass
 			pass
 
 
@@ -145,7 +145,7 @@ def colourVertices(triMat, numOfColours, length):
 		return True
 
 	
-		print(colours)
+		#print(colours)
 	#	return True
 
 	return colours

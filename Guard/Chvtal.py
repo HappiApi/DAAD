@@ -13,6 +13,7 @@ import math
 import matplotlib.pyplot as plt
 
 import colour
+import star
 
 polygons = json.loads(parse.getJSON('guards.pol.txt'))
 
@@ -79,24 +80,22 @@ def min_colour(colours):
 		if colours.count(c) < count:
 			count = colours.count(c)
 			colour = c
-	return c
+	return colour
 
 def getGuards(polygon_no):
 	positions = []
 	data = triangulate(polygons[str(polygon_no)])
-	adj_m = adj_matrix(data)
-	colours = colour.colourVertices(adj_m, 3)
-	c = min_colour(colours)
-	for co, v in zip(colours, data['tri']['vertices']):
-		if co ==c:
+	# adj_m = adj_matrix(data)
+	colours = colour.colourVertices(data['tri']['triangles'], 3, len(data['tri']['vertices']))
+	min_c = min_colour(colours)
+	for c, v in zip(colours, data['tri']['vertices']):
+		if c == min_c:
 			# print(c,v)
 			positions.append(v.tolist())
 	return positions
-	# pdb.set_trace()
 
-def output(data):
+def output():
 	with open('test2.pol', 'w') as f:
 		for i in range(1,31):
 			s = str(i) + ": " + ', '.join(map(str,getGuards(i))).replace('[','(').replace(']',')')
-			# pdb.set_trace()
 			f.write(s+'\n')
