@@ -23,6 +23,10 @@ for computing visibility polygon (correction of Lee's linear algorithm 1979, in 
 
 ##### [Implementation](http://arxiv.org/abs/1403.3905)
 
+#### Heuristic algorithm for vertex coloring of graphs  
+
+[paper](http://arxiv.org/pdf/1210.5176.pdf)
+
 #### Some other polygon stuff
 
 Convex Polygon - No interior angle > 180 deg  

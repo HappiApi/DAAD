@@ -104,8 +104,9 @@ def colourVertices(adjMat, numOfColours):
 		# return False
 		pass
 	else:
-		print(colours)
+		# print(colours)
 		# return True
+		pass
 
 	return colours
 
