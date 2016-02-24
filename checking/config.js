@@ -14,6 +14,7 @@ System.config({
   },
 
   map: {
+    "2d-polygon-boolean": "npm:2d-polygon-boolean@1.0.1",
     "babel": "npm:babel-core@5.8.35",
     "babel-runtime": "npm:babel-runtime@5.8.35",
     "core-js": "npm:core-js@1.2.6",
@@ -33,6 +34,12 @@ System.config({
     },
     "github:jspm/nodelibs-util@0.1.0": {
       "util": "npm:util@0.10.3"
+    },
+    "npm:2d-polygon-boolean@1.0.1": {
+      "2d-polygon-area": "npm:2d-polygon-area@1.0.0",
+      "point-in-big-polygon": "npm:point-in-big-polygon@1.0.0",
+      "segseg": "npm:segseg@0.2.1",
+      "signum": "npm:signum@1.0.0"
     },
     "npm:assert@1.3.0": {
       "util": "npm:util@0.10.3"
@@ -64,8 +71,27 @@ System.config({
     "npm:path-browserify@0.0.0": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
+    "npm:point-in-big-polygon@1.0.0": {
+      "robust-orientation": "npm:robust-orientation@1.1.3",
+      "slab-decomposition": "npm:slab-decomposition@1.0.2"
+    },
     "npm:process@0.11.2": {
       "assert": "github:jspm/nodelibs-assert@0.1.0"
+    },
+    "npm:robust-orientation@1.1.3": {
+      "robust-scale": "npm:robust-scale@1.0.2",
+      "robust-subtract": "npm:robust-subtract@1.0.0",
+      "robust-sum": "npm:robust-sum@1.0.0",
+      "two-product": "npm:two-product@1.0.2"
+    },
+    "npm:robust-scale@1.0.2": {
+      "two-product": "npm:two-product@1.0.2",
+      "two-sum": "npm:two-sum@1.0.0"
+    },
+    "npm:slab-decomposition@1.0.2": {
+      "binary-search-bounds": "npm:binary-search-bounds@1.0.0",
+      "functional-red-black-tree": "npm:functional-red-black-tree@1.0.1",
+      "robust-orientation": "npm:robust-orientation@1.1.3"
     },
     "npm:util@0.10.3": {
       "inherits": "npm:inherits@2.0.1",
