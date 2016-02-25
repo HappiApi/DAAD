@@ -3,7 +3,7 @@ import _ from 'lodash';
 export default function(polygon, guard) {
   var segments = convertToSegments(polygon);
   var sightPolygon = getSightPolygon(guard.x, guard.y, segments);
-  return _.map(convertToPolygon(sightPolygon), a => ({x: a[0], y: a[1]}));
+  return sightPolygon;
 }
 
 function edges(array) {
@@ -15,7 +15,8 @@ function edges(array) {
 }
 
 function convertToSegments(polygon) {
-  var points = _.clone(polygon);
+  var points = _.cloneDeep(polygon);
+  if(points.length) points.push(_.cloneDeep(polygon[0]));
   var segments = edges(points);
   return segments;
 }
@@ -79,7 +80,7 @@ function getSightPolygon(sightX,sightY, segments){
 		var uniquePoint = uniquePoints[j];
 		var angle = Math.atan2(uniquePoint.y-sightY,uniquePoint.x-sightX);
 		uniquePoint.angle = angle;
-		uniqueAngles.push(angle-0.000000000000001,angle,angle+0.000000000000001);
+		uniqueAngles.push(angle-0.00000000001,angle,angle+0.00000000001);
 	}
 
 	// RAYS IN ALL DIRECTIONS
