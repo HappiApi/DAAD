@@ -34,6 +34,7 @@ def get_chosen_colour_list(colour_list, chosen_colour):
 	return ret
 
 # Given a vertex index, get list of index of vertex that makes star polygon
+# !! Important, adds itself to the vertex list of polygon as adj_matrix doesn't show itself
 def find_polygons(chosen_colour_list, adj_matrix):
 	polygons = []
 	# pdb.set_trace()

@@ -9,7 +9,10 @@ import pdb
 import triangle
 import triangle.plot
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
 # Written Libraries
 import colour
 import star
@@ -32,6 +35,7 @@ def triangulate(points_array):
 	return {'original':input_dict, 'tri':tri}
 
 # Get adjacency matrix for one polygon (2D array)
+# !! Important, doesn't add itself to the adjacency matrix
 def adj_matrix(tri_data):
 	triangles = tri_data['tri']['triangles']
 	vertices_no = len(tri_data['tri']['vertices'])
@@ -71,15 +75,65 @@ def get_stars(tri_data):
 	stars = star.find_polygons(star.get_chosen_colour_list(colours, get_min_colour(colours)), adj_matrix(tri_data))
 	return stars
 
+def star_poly_array(star_data, vertices):
+	polygons = []
+	for poly in star_data:
+		polygon = []
+		poly.sort()
+		for vertex in poly:
+			polygon.append(vertices[vertex])
+		polygons.append(np.array(polygon))
+	return polygons
+
 # Return 2D array of position of guards
 def getGuards(polygon_no):
 	positions = []
 	data = triangulate(polygons[str(polygon_no)])
+	vertices = data['tri']['vertices']
 	colours = get_colour(data)
 	min_c = get_min_colour(colours)
-	for c, v in zip(colours, data['tri']['vertices']):
+	stars = get_stars(data)
+	star_polygons = star_poly_array(stars, vertices)
+	print(stars)
+	print(star_polygons)
+	print(vertices)
+	print(min_c)
+	adj = adj_matrix(data)
+	# print(adj[24])
+	# print(adj[33])
+	# print(adj[60])
+	# pdb.set_trace()
+
+	def compare(plt, A, B): 
+	    ax1 = plt.subplot(121, aspect='equal')
+	    triangle.plot.plot(ax1, **A)
+	    ax2 = plt.subplot(122, sharex=ax1, sharey=ax1)
+	    triangle.plot.plot(ax2, **B)
+	    return (ax1, ax2)
+
+	ax1, ax2 = compare(plt, data['original'], data['tri'])
+
+	patches = []
+	for polygon in star_polygons:
+		p = Polygon(polygon, True)
+		patches.append(p)
+	p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
+	plt.gca().add_collection(p)
+
+	for i, v in enumerate(vertices):
+		ax1.text(v[0], v[1], str(i))
+
+	for c, v in zip(colours, vertices):
 		if c == min_c:
 			positions.append(v.tolist())
+		plt.annotate(c, xy=tuple(v), color='darkblue')
+
+	colors = range(0,100, int(100/len(patches)))
+	p.set_array(np.array(colors))	
+	plt.subplots_adjust(left=0, bottom=0, right=1, top=1,
+                wspace=0, hspace=0)
+	plt.show()
+	# pdb.set_trace()
 	return positions
 
 def show_tri(dic):
