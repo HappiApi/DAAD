@@ -6,40 +6,32 @@ import _ from 'lodash';
 import d3 from 'd3';
 import parser from './parse.js';
 
-// Gets to slope of 2 lines
-function getSlopes(line1, line2) {
-  let m1, m2;
-  m1 = (line1[1][1] - line1[0][1]) / (line1[1][0] - line1[0][0]);
-  m2 = (line2[1][1] - line2[0][1]) / (line2[1][0] - line2[0][0]);
+// Line intersection from:
+// http://jsfiddle.net/justin_c_rounds/Gd2S2/
+function checkLineIntersection(line1, line2) {
+    var denominator, a, b, numerator1, numerator2, result = {
+        x: null,
+        y: null
+    };
+    denominator = ((line2[1].y - line2[0].y) * (line1[1].x - line1[0].x)) - ((line2[1].x - line2[0].x) *
+    (line1[1].y - line1[0].y));
+    if (denominator === 0) {
+        return null;
+    }
+    a = line1[0].y - line2[0].y;
+    b = line1[0].x - line2[0].x;
+    numerator1 = ((line2[1].x - line2[0].x) * a) - ((line2[1].y - line2[0].y) * b);
+    numerator2 = ((line1[1].x - line1[0].x) * a) - ((line1[1].y - line1[0].y) * b);
+    a = numerator1 / denominator;
+    b = numerator2 / denominator;
+    // if we cast these lines infinitely in both directions, they intersect here:
+    result.x = line1[0].x + (a * (line1[1].x - line1[0].x));
+    result.y = line1[0].y + (a * (line1[1].y - line1[0].y));
 
-  if(m1 === Infinity || m2 === Infinity ||
-      m1 === -Infinity || m2 === -Infinity) {
-    return [0, 0];
-  }
-  return [m1, m2];
-}
-
-// Returns the intersection of 2 finite lines, if the lines
-// don't intersect, the function returns null
-// Lines are in the format:
-// line = [{x: xcoord, y: ycoord}, {x: xcoord, y: ycoord}];
-function lineIntersection(line1, line2) {
-  let m = getSlopes(line1, line2);
-  let x = m[1] * line2[0][0] - m[0] * line1[0][0] - line2[0][1] + line1[0][1];
-  x = x / (m[0] - m[1]);
-  if(x === Infinity || x === -Infinity || isNaN(x)) {
+    if (a > 0 && a < 1 && b > 0 && b < 1) {
+        return result;
+    }
     return null;
-  }
-  let y = m[0]*(x - line1[0][0]) - line1[0][1];
-  x = -x; y = -y;
-
-  let min = {x: _.min(line1.map(a => a[0])), y: _.min(line1.map(a => a[1]))};
-  let max = {x: _.max(line1.map(a => a[0])), y: _.max(line1.map(a => a[1]))};
-
-  if(x < min[0] || x > max[0] || y < min[1] || y > max[1]) {
-    return null;
-  }
-  return {x, y};
 }
 
 // Returns an array of lines that represent the
