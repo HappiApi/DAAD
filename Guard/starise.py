@@ -196,7 +196,7 @@ starShapedPolygons = createPolygons()
 def isPointInShape(polygon, x, y):
 	angle = 0.0
 
-	print(polygon)
+	# print(polygon)
 
 	for j in xrange(0,len(polygon)):
 			p1x = verticesCoordinates[polygon[j]][0] - x
@@ -227,14 +227,84 @@ def isPointInShape(polygon, x, y):
 
 
 	isInsideShape = (angle/math.pi*2 < 4.1) and (angle/math.pi*2 > 3.9)
-	print(isInsideShape)
+	# print(isInsideShape)
+	return isInsideShape
+
+def createInequality(poly, x, y, prob):
+	# print(poly)
+	
+	for q in xrange(0,len(poly)):
+		p1 = verticesCoordinates[poly[q%len(poly)]]
+		p2 = verticesCoordinates[poly[(q+1)%len(poly)]]
+
+		gradient = (p1[1] - p2[1]) / (p1[0] - p2[0])
+		c = p1[1] - (gradient*p1[0])
+
+
+		yGrad = 1
+
+		normal = 1
+
+		if gradient != 0:
+			normal = -1/gradient
+			pass
+		else:
+			yGrad = 0 #THIS IS WRONG NEEDS AN ACTUAL FIX
+
+		dx = p1[0] - p2[0]
+		dy = p1[1] - p2[1]
+
+		midpoint = [p2[0]+dx/2.0,p2[1]+dy/2.0]
+		# print(midpoint)
+		p3 = [midpoint[0]+0.1,midpoint[1]+(0.1*normal)]
+
+		if gradient == 0:
+			p3 = [midpoint[0]-0.1, midpoint[1]]
+			pass
+
+		#y = mx + c
+		#c = y-mx
+		# print("GRAD")
+		# print(gradient)
+
+
+		#print(p3[0],p3[1])
+
+		isInShape =	isPointInShape(poly,p3[0],p3[1])
+
+
+
+		if isInShape:
+			if gradient <= 0:
+				prob += y - (gradient * x) >= c
+				pass
+			else:
+				prob += y - (gradient*x) <= c
+		else:
+			if gradient <= 0:
+				prob += y - (gradient * x) <= c
+				pass
+			else:
+				prob += y - (gradient*x) >= c
+		pass
+
+		print([isInShape, gradient])
+
+
 
 for x in xrange(0,len(starShapedPolygons)):
 	#print(starShapedPolygons[x])
 
-	isPointInShape(starShapedPolygons[x], 14, 9)
+	#isPointInShape(starShapedPolygons[x], 14, 9)
+	xG = pulp.LpVariable("x", 0.0, 3000.0)
+	yG = pulp.LpVariable("y", 0.0, 3000.0)
+	problem = pulp.LpProblem("prob", pulp.LpMaximize)
+	createInequality(starShapedPolygons[x], xG, yG, problem)
+	status = problem.solve()
+	# print(pulp.LpStatus[status])
+	print("ANSWER")
+	print([pulp.value(xG), pulp.value(yG)])
+	# print(problem)
 
 	pass
-
-
 
