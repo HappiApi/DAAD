@@ -133,7 +133,7 @@ verticesCoordinates = [[12,12],
 
 
 def setupVars():
-	for x in xrange(0,30):
+	for x in range(0,30):
 		colourCounts[colourList[x]-1] += 1
 	pass
 
@@ -154,7 +154,7 @@ def createPolygons():
 	pass
 
 	arrayOfLeastColour = []
-	for x in xrange(0,30):
+	for x in range(0,30):
 		if colourList[x] == indexToUse+1:
 			arrayOfLeastColour.append(x)
 		pass
@@ -164,7 +164,7 @@ def createPolygons():
 
 	starShapedPolygons = []
 
-	for x in xrange(0,colourCounts[indexToUse]):
+	for x in range(0,colourCounts[indexToUse]):
 		currentVertex = arrayOfLeastColour[x]
 
 
@@ -172,7 +172,7 @@ def createPolygons():
 
 		
 
-		for y in xrange(0,30):
+		for y in range(0,30):
 			isConnected = graph[currentVertex][y]
 
 			if isConnected == 1:
@@ -193,17 +193,17 @@ def createPolygons():
 setupVars()
 starShapedPolygons = createPolygons()
 
-def isPointInShape(polygon, x, y):
+def isPointInShape(polygon, vertices, x, y):
 	angle = 0.0
 
 	# print(polygon)
 
-	for j in xrange(0,len(polygon)):
-			p1x = verticesCoordinates[polygon[j]][0] - x
-			p1y = verticesCoordinates[polygon[j]][1] - y
+	for j in range(0,len(polygon)):
+			p1x = vertices[polygon[j]][0] - x
+			p1y = vertices[polygon[j]][1] - y
 
-			p2x = verticesCoordinates[polygon[(j+1)%len(polygon)]][0] - x
-			p2y = verticesCoordinates[polygon[(j+1)%len(polygon)]][1] - y
+			p2x = vertices[polygon[(j+1)%len(polygon)]][0] - x
+			p2y = vertices[polygon[(j+1)%len(polygon)]][1] - y
 
 			dtheta = 0.0
 			theta1 = 0.0
@@ -226,16 +226,18 @@ def isPointInShape(polygon, x, y):
 	pass
 
 
-	isInsideShape = (angle/math.pi*2 < 4.1) and (angle/math.pi*2 > 3.9)
+	isInsideShape = (angle/(math.pi*2) < 1.1) and (angle/(math.pi*2) > 0.9)
 	# print(isInsideShape)
 	return isInsideShape
 
-def createInequality(poly, x, y, prob):
+# Adds inequality to problem object
+# Doesn't deal with when gradient is infinite (line 242)
+def createInequality(poly, vertices, x, y, prob):
 	# print(poly)
 	
-	for q in xrange(0,len(poly)):
-		p1 = verticesCoordinates[poly[q%len(poly)]]
-		p2 = verticesCoordinates[poly[(q+1)%len(poly)]]
+	for q in range(0,len(poly)):
+		p1 = vertices[poly[q%len(poly)]]
+		p2 = vertices[poly[(q+1)%len(poly)]]
 		c = 0
 		normal = 1
 		gradient = 0
@@ -245,7 +247,6 @@ def createInequality(poly, x, y, prob):
 		else:
 			gradient = (p1[1] - p2[1]) / (p1[0] - p2[0])
 			c = p1[1] - (gradient*p1[0])
-
 
 		yGrad = 1
 
@@ -260,8 +261,10 @@ def createInequality(poly, x, y, prob):
 		dx = p1[0] - p2[0]
 		dy = p1[1] - p2[1]
 
+		# Check which side of line is inside the shape
 		midpoint = [p2[0]+dx/2.0,p2[1]+dy/2.0]
 		# print(midpoint)
+		# 0.1 is to move a tiny bit, too much outside shape
 		p3 = [midpoint[0]+0.1,midpoint[1]+(0.1*normal)]
 
 		if gradient == 0:
@@ -278,7 +281,7 @@ def createInequality(poly, x, y, prob):
 
 		#print(p3[0],p3[1])
 
-		isInShape =	isPointInShape(poly,p3[0],p3[1])
+		isInShape =	isPointInShape(poly, vertices, p3[0],p3[1])
 
 
 
@@ -300,14 +303,14 @@ def createInequality(poly, x, y, prob):
 
 
 
-for x in xrange(0,len(starShapedPolygons)):
+for x in range(0,len(starShapedPolygons)):
 	#print(starShapedPolygons[x])
 
 	#isPointInShape(starShapedPolygons[x], 14, 9)
 	xG = pulp.LpVariable("x", 0.0, 3000.0)
 	yG = pulp.LpVariable("y", 0.0, 3000.0)
 	problem = pulp.LpProblem("prob", pulp.LpMaximize)
-	createInequality(starShapedPolygons[x], xG, yG, problem)
+	createInequality(starShapedPolygons[x], verticesCoordinates, xG, yG, problem)
 	status = problem.solve()
 	# print(pulp.LpStatus[status])
 	print("ANSWER")
@@ -316,3 +319,12 @@ for x in xrange(0,len(starShapedPolygons)):
 
 	pass
 
+def kernel(polygon, vertices):
+	xG = pulp.LpVariable("x", -3000.0, 3000.0)
+	yG = pulp.LpVariable("y", -3000.0, 3000.0)
+	problem = pulp.LpProblem("prob", pulp.LpMaximize)
+	createInequality(polygon, vertices, xG, yG, problem)
+	status = problem.solve()
+	print("ANSWER")
+	print([pulp.value(xG), pulp.value(yG)])
+	print(problem)

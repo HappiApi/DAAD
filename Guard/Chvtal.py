@@ -116,7 +116,7 @@ def getGuards(polygon_no):
 	for polygon in star_polygons:
 		p = Polygon(polygon, True)
 		patches.append(p)
-	p = PatchCollection(patches, cmap=matplotlib.cm.jet, alpha=0.4)
+	p = PatchCollection(patches, cmap=matplotlib.cm.jet)
 	plt.gca().add_collection(p)
 
 	for i, v in enumerate(vertices):
