@@ -1,23 +1,23 @@
+# Standard Libraries
 import parse
 import json
 import pprint
 import sys
-
+import math
 import pdb
-
-from scipy.spatial import Delaunay
+# Dependency Libraries
 import triangle
 import triangle.plot
 import numpy as np
-import math
 import matplotlib.pyplot as plt
-
+# Written Libraries
 import colour
 import star
 
+# Get polygons 
 polygons = json.loads(parse.getJSON('guards.pol.txt'))
 
-#triangulate and returns (orginal, triangulated) tuple
+#triangulate and returns dict for 'original' and 'tri' (triangulated) polygons
 def triangulate(points_array):
 
 	def ccw_segments(points_array):
@@ -31,14 +31,7 @@ def triangulate(points_array):
 
 	return {'original':input_dict, 'tri':tri}
 
-def show_tri(dic):
-	triangle.plot.compare(plt, dic['original'], dic['tri'])
-	plt.show()
-
-def t(polygon_no):
-	show_tri(triangulate(polygons[str(polygon_no)]))
-
-# Get adjacency matrix for one polygon
+# Get adjacency matrix for one polygon (2D array)
 def adj_matrix(tri_data):
 	triangles = tri_data['tri']['triangles']
 	vertices_no = len(tri_data['tri']['vertices'])
@@ -64,38 +57,42 @@ def adj_matrix(tri_data):
 
 	return adj_mat
 
-# def add_colours(tri_data):
-# 	colours = colour.colourVertices(adj_matrix(tri_data), 3)
-# 	pdb.set_trace() 
+# Get array of colours, index in array is index of vertex, value is colour
+def get_colour(tri_data):
+	return colour.colourVertices(tri_data['tri']['triangles'], 3, len(tri_data['tri']['vertices']))
 
-# 	vertices = tri_data['tri']['vertices'].tolist()
-# 	for vertex,c in zip(vertices, colours):
-# 			vertex = {'coord':vertex, 'colour': c}
+# Returns minimum colour from colour list
+def get_min_colour(colour_list):
+	return star.get_min_colour(star.get_colour_count(colour_list))
 
-def min_colour(colours):
-	c_options = set(colours)
-	count = sys.maxsize
-	colour = None
-	for c in c_options:
-		if colours.count(c) < count:
-			count = colours.count(c)
-			colour = c
-	return colour
+# Return 2D array of star polygon, each being index of vertices of ach polygon
+def get_stars(tri_data):
+	colours = get_colour(tri_data)
+	stars = star.find_polygons(star.get_chosen_colour_list(colours, get_min_colour(colours)), adj_matrix(tri_data))
+	return stars
 
+# Return 2D array of position of guards
 def getGuards(polygon_no):
 	positions = []
 	data = triangulate(polygons[str(polygon_no)])
-	# adj_m = adj_matrix(data)
-	colours = colour.colourVertices(data['tri']['triangles'], 3, len(data['tri']['vertices']))
-	min_c = min_colour(colours)
+	colours = get_colour(data)
+	min_c = get_min_colour(colours)
 	for c, v in zip(colours, data['tri']['vertices']):
 		if c == min_c:
-			# print(c,v)
 			positions.append(v.tolist())
 	return positions
 
+def show_tri(dic):
+	triangle.plot.compare(plt, dic['original'], dic['tri'])
+	plt.show()
+
+def t(polygon_no):
+	show_tri(triangulate(polygons[str(polygon_no)]))
+
 def output():
-	with open('test2.pol', 'w') as f:
+	with open('test3.pol', 'w') as f:
 		for i in range(1,31):
 			s = str(i) + ": " + ', '.join(map(str,getGuards(i))).replace('[','(').replace(']',')')
 			f.write(s+'\n')
+
+
