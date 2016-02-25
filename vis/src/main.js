@@ -36,14 +36,17 @@ daah.getCheck().then(function(data) {
   setGuards(data[i].guards);
 });
 
+var coordsElem = document.querySelector(".position");
+
 function mousemove() {
   var mouse = d3.mouse(this);
   var coords = [
     x.invert(mouse[0]),
     y.invert(mouse[1])
   ]
-  mouseGuard = coords;
-  redraw = true;
+  coordsElem.innerHTML = "(" + coords.map(d => d.toPrecision(5)).join(",") + ")";
+  // mouseGuard = coords;
+  // redraw = true;
 }
 
 function mouseleave() {
