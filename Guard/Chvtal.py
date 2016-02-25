@@ -79,7 +79,6 @@ def star_poly_array(star_data, vertices):
 	polygons = []
 	for poly in star_data:
 		polygon = []
-		poly.sort()
 		for vertex in poly:
 			polygon.append(vertices[vertex])
 		polygons.append(np.array(polygon))

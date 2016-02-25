@@ -44,6 +44,7 @@ def find_polygons(chosen_colour_list, adj_matrix):
 		for i, adj_vertex in enumerate(adj_matrix[index]):
 			if adj_vertex:
 				polygon_vertices.append(i)
+		polygon_vertices.sort()
 		polygons.append(polygon_vertices)
 	return polygons
 
