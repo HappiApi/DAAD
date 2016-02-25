@@ -1,7 +1,10 @@
 import _ from 'lodash';
 import d3 from 'd3';
-import alg from './algorithm.js';
-import parser from './parse.js';
+import alg from './algorithm';
+import parser from './parse';
+import visPoly from './visibility-polygon';
+
+visPoly([[0,0], [2,0], [2,2], [1,2], [1,3], [0,3], [0,0]], 1, 1);
 
 function getSlopes(line1, line2) {
   let m1, m2;

@@ -156,7 +156,7 @@ draw();
 
 
 function setPolygon(newPolygon) {
-  polygon = newPolygon;
+  polygon = newPolygon || [];
   zoomBehavior.translate([0,0]);
   zoomBehavior.scale(1);
   var xs = newPolygon.map(_.first);
@@ -170,19 +170,15 @@ function setPolygon(newPolygon) {
 }
 
 function setGuards(newGuards) {
-  guards = newGuards;
+  guards = newGuards || [];
   redraw = true;
 }
 
 window.addEventListener("keydown", function(event) {
-  if (event.keyCode == 39) {
-    i++;
+  if (event.keyCode == 37 || event.keyCode == 39) {
+    i += event.keyCode == 37 ? -1 : 1;
+    setPolygon(data[i].map)
+    setGuards(data[i].guards);
+    event.preventDefault();
   }
-  if (event.keyCode == 37) {
-    i--;
-    redraw = true;
-  }
-  event.preventDefault();
-  setPolygon(data[i].map)
-  setGuards(data[i].guards);
 })
