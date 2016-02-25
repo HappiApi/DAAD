@@ -107,7 +107,7 @@ function getSightPolygon(sightX,sightY, segments){
 		var yToCheck = ray.b.y;
 
 		var k;
-		
+
 		var p1 = {
 			x:0.0,
 			y:0.0
@@ -151,7 +151,7 @@ function getSightPolygon(sightX,sightY, segments){
 			var intersect = getIntersection(ray,segments[i]);
 
 			if(!intersect) continue;
-			if(isInsideShape) 
+			if(isInsideShape)
 			{
 				if (intersect.x == sightX && intersect.y == sightY)
 				{
@@ -198,4 +198,3 @@ function getSightPolygon(sightX,sightY, segments){
 	return intersects;
 
 }
-
