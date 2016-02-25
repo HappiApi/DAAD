@@ -236,20 +236,26 @@ def createInequality(poly, x, y, prob):
 	for q in xrange(0,len(poly)):
 		p1 = verticesCoordinates[poly[q%len(poly)]]
 		p2 = verticesCoordinates[poly[(q+1)%len(poly)]]
-
-		gradient = (p1[1] - p2[1]) / (p1[0] - p2[0])
-		c = p1[1] - (gradient*p1[0])
+		c = 0
+		normal = 1
+		gradient = 0
+		if (p1[0] - p2[0]) == 0:
+			normal = 0
+			pass
+		else:
+			gradient = (p1[1] - p2[1]) / (p1[0] - p2[0])
+			c = p1[1] - (gradient*p1[0])
 
 
 		yGrad = 1
 
-		normal = 1
+		
 
 		if gradient != 0:
 			normal = -1/gradient
 			pass
 		else:
-			yGrad = 0 #THIS IS WRONG NEEDS AN ACTUAL FIX
+			yGrad = 0 
 
 		dx = p1[0] - p2[0]
 		dy = p1[1] - p2[1]
@@ -261,6 +267,8 @@ def createInequality(poly, x, y, prob):
 		if gradient == 0:
 			p3 = [midpoint[0]-0.1, midpoint[1]]
 			pass
+		elif (p1[0] - p2[0]) == 0:
+			p3 = [midpoint[0], midpoint[1]+0.1]
 
 		#y = mx + c
 		#c = y-mx
