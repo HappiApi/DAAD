@@ -41,13 +41,15 @@ function parseCheckLine(line) {
 daah.getGuards = function() {
   return daah.getText("txt/guards.pol.txt").then(function(text) {
     var pairs = text.split("\n").map(parseGaurdsLine);
+    pairs.pop();
     return _.fromPairs(pairs);
   });
 };
 
 daah.getCheck = function() {
-  return daah.getText("txt/check.pol.txt").then(function(text) {
-    var pairs = text.split("\n").map(parseCheckLine);
+  return daah.getText("txt/combo.pol.txt").then(function(text) {
+
+    var pairs = _.compact(text.split("\n")).map(parseCheckLine);
     return _.fromPairs(pairs);
   });
 };
