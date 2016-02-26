@@ -108,6 +108,12 @@ function drawSightPolygons(guards) {
     drawPolygonPath(polygon);
     context.fillStyle = "red";
     context.fill();
+    polygon.forEach(function(coords) {
+      context.beginPath();
+      context.arc(x(coords[0]), y(coords[1]), 3, 0, 2*Math.PI);
+      context.fillStyle = "#a00";
+      context.fill();
+    });
   });
   context.restore();
 }
