@@ -34,7 +34,7 @@ function rayIntersection(ray, segment) {
     result.x = ray[0].x + (a * (ray[1].x - ray[0].x));
     result.y = ray[0].y + (a * (ray[1].y - ray[0].y));
 
-    if (a > 0 && b > 0 && b < 1) {
+    if (a > 0 && b >= 0 && b <= 1) {
         return result;
     }
     return null;
@@ -101,7 +101,16 @@ function pointsInOrder(polygon, a, b) {
 }
 
 function ccw(a, b, c) {
-  return (b.x - a.x) * (c.y - a.y) > (b.y - a.y) * (c.x - a.x)
+  return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > EPSILON;
+}
+
+function getInsideAngleBounds(polygon, i) {
+  var nextIndex = (i + 1) % polygon.length;
+  var prevIndex = (i - 1 + polygon.length) % polygon.length;
+  return [
+    angleFromTo(polygon[i], polygon[nextIndex]),
+    angleFromTo(polygon[i], polygon[prevIndex])
+  ];
 }
 
 function visibilityPolygon(guard, polygon) {
@@ -109,6 +118,7 @@ function visibilityPolygon(guard, polygon) {
   var points = _.clone(polygon);
   var segments = getSegments(polygon);
   var angleWithinBounds = function() { return true; }
+  var bounds = [0, 2*Math.PI];
 
   var visPolygon = [];
 
@@ -119,12 +129,11 @@ function visibilityPolygon(guard, polygon) {
   // actually, send rays to it, but ignore distances == 0
   if (pointIndex !== -1) {
     console.log("there is a guard on a vertex");
-    var nextIndex = (pointIndex + 1) % polygon.length;
-    var prevIndex = (pointIndex - 1 + polygon.length) % polygon.length;
-    angleWithinBounds = angleWithinGenerator(
-      angleFromTo(polygon[pointIndex], polygon[nextIndex]),
-      angleFromTo(polygon[pointIndex], polygon[prevIndex])
-    );
+    bounds = getInsideAngleBounds(polygon, pointIndex);
+    angleWithinBounds = angleWithinGenerator(bounds[0], bounds[1]);
+    points = points.filter(function(point) {
+      return point.x !== guard.x && point.y !== guard.y;
+    });
     visPolygon.push({x: guard.x, y: guard.y});
   } else if (liesOnSegment = _.find(segments, function(segment) { return pointLiesOn(guard, segment); })) {
     console.log("there is a guard on a segment");
@@ -143,8 +152,12 @@ function visibilityPolygon(guard, polygon) {
     };
   });
 
-  points = _.sortBy(points, ["angle", "distance"]);
-  // points = _.sortedUniqBy(points, "angle");
+  points = _.orderBy(points, ["angle", "distance"], ["asc", "desc"]);
+  points = _.sortedUniqBy(points, d => d.angle.toPrecision(5));
+
+  points = _.sortBy(points, function(point) {
+    return angleDifference(bounds[0], point.angle);
+  });
 
   for (var i = 0; i < points.length; i++) {
 
@@ -156,35 +169,51 @@ function visibilityPolygon(guard, polygon) {
     }
 
     var closestDistance = Infinity;
-    var closestSegment;
-    var closestIntersection;
+    var closestSegment = null;
+    var closestIntersection = null;
 
     segments.forEach(function(segment) {
       var ray = [guard, point];
       var intersectionPoint = rayIntersection(ray, segment);
       var distance = Infinity;
-      if (intersectionPoint) distance = getDistance(guard, intersectionPoint);
-      if (distance && distance < closestDistance) {
-        closestDistance = distance;
-        closestSegment = segment;
-        closestIntersection = intersectionPoint;
+      if (intersectionPoint && Math.abs(intersectionPoint.x - point.x) > EPSILON && Math.abs(intersectionPoint.y - point.y) > EPSILON) {
+        distance = getDistance(guard, intersectionPoint);
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestSegment = segment;
+          closestIntersection = intersectionPoint;
+        }
       }
     });
 
     var p = {x: point.x, y: point.y};
 
-    if (point.distance <= closestDistance) {
-      var passThrough = ccw(guard, points[i], points[(i-1+points.length) % points.length])
-                     == ccw(guard, points[i], points[(i+1) % points.length]);
-      console.log(ccw(guard, points[i], points[(i-1+points.length) % points.length]), ccw(guard, points[i], points[(i+1) % points.length]), passThrough);
-      if (passThrough && closestIntersection) {
-        if (pointsInOrder(polygon, p, closestIntersection)) {
+    if (closestDistance - point.distance > EPSILON) {
+      var index = _.findIndex(polygon, p);
+      var bounds = getInsideAngleBounds(polygon, index);
+      var passThrough = angleWithinGenerator(bounds[0], bounds[1])(point.angle);
+      // console.log(ccw(points[(i-1+points.length) % points.length], point, guard), ccw(guard, point, points[(i+1) % points.length]), passThrough);
+      if (passThrough && closestIntersection && Math.abs(closestIntersection.x - point.x) > EPSILON && Math.abs(closestIntersection.y - point.y) > EPSILON) {
+        // var a = pointsInOrder(polygon, p, closestSegment[0])
+        // debugger;
+        // if (visPolygon.length === 0 || _.isEqual(visPolygon[visPolygon.length-1], polygon[(i+1) % polygon.length])) {
+        //   console.log("yay");
           visPolygon.push(closestIntersection);
           visPolygon.push(p);
-        } else {
-          visPolygon.push(p);
-          visPolygon.push(closestIntersection);
-        }
+        // } else {
+        //   console.log("nay");
+          // visPolygon.push(p);
+          // visPolygon.push(closestIntersection);
+        // }
+        // if (pointsInOrder(polygon, p, closestSegment[0])) {
+        //   console.log("in order");
+        //   visPolygon.push(p);
+        //   visPolygon.push(closestIntersection);
+        // } else {
+        //   console.log("not in order");
+        //   visPolygon.push(closestIntersection);
+        //   visPolygon.push(p);
+        // }
       } else {
         visPolygon.push(p);
       }
@@ -195,6 +224,16 @@ function visibilityPolygon(guard, polygon) {
       debugger;
     }
   }
+
+  var sortedPolygon = [];
+
+  segments.forEach(function(segment) {
+    visPolygon.forEach(function(point) {
+      if (_.isEqual(point, segment[0])) sortedPolygon.push(point);
+      if (pointLiesOn(point, segment)) sortedPolygon.push(point);
+      if (_.isEqual(point, segment[1])) sortedPolygon.push(point);
+    });
+  });
 
   // console.log(visPolygon);
 
@@ -209,8 +248,9 @@ function visibilityPolygon(guard, polygon) {
   //   if (bi == -1) bi = _.findIndex(segments, function(segment) {
   //     return pointLiesOn({x:b.x, y:b.y}, segment);
   //   });
+  //
   //   return ai - bi;
   // });
 
-  return visPolygon;
+  return sortedPolygon;
 }
