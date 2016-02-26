@@ -45,8 +45,8 @@ function mousemove() {
     y.invert(mouse[1])
   ]
   coordsElem.innerHTML = "(" + coords.map(d => d.toPrecision(5)).join(",") + ")";
-  // mouseGuard = coords;
-  // redraw = true;
+  mouseGuard = coords;
+  redraw = true;
 }
 
 function mouseleave() {
