@@ -2,198 +2,6 @@ import pulp
 import math
 import pdb
 
-colourList = [1, 2, 3, 2, 1, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 2, 1, 3, 2, 3, 1, 3]
-
-graph = [[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], #1
-		
-		[1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], #2
-		
-		[0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #3
-		
-		[0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #4
-		
-		[0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1], #5
-		
-		[0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1], #6
-		
-		[0,0,0,0,0,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #7
-		
-		[0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #8
-		
-		[0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #9
-		
-		[0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], #10
-		
-		[0,0,0,0,0,1,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0],#11
-		
-		[0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0],#12
-		
-		[0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],#13
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],#14
-		
-		[0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0],#15
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0], #16
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0],#17
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0],#18
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0],#19
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0],#20
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0],#21
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,1,0,1,0,0,0,0,0],#22
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0],#23
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0],#24
-		
-		[0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0],#25
-		
-		[0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0],#26
-		
-
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0],#27
-		
-		[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0],#28
-		
-		[0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1],#29
-		
-		[1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],#30
-		
-		]
-
-
-colourCounts = [0,0,0]
-
-
-verticesCoordinates = [[12,12],
-					
-					[11,5],
-					
-					[43,0],
-					
-					[44,8],
-					
-					[32,10],
-					
-					[23,18],
-					
-					[36,17],
-					
-					[35,13],
-					
-					[45,15],
-					
-					[48,27],
-					
-					[36,24],
-					
-					[31,33],
-					
-					[42,34],
-					
-					[44,39],
-					
-					[29,42],
-					
-					[27,53],
-					
-					[49,50],
-					
-					[55,57],
-					
-					[5,63],
-					
-					[0,57],
-					
-					[17,53],
-					
-					[19,42],
-					
-					[12,43],
-					
-					[10,36],
-					
-					[19,37],
-					
-					[24,26],
-					
-					[12,30],
-					
-					[6,24],
-					
-					[16,18],
-					
-					[21,11],
-					]
-
-
-def setupVars():
-	for x in range(0,30):
-		colourCounts[colourList[x]-1] += 1
-	pass
-
-	#print(colourCounts)
-
-def createPolygons():
-	indexToUse = 0
-	if (colourCounts[0] < colourCounts[1]) and (colourCounts[0] < colourCounts[2]):
-		indexToUse = 0
-	pass
-
-	if (colourCounts[1] < colourCounts[0]) and (colourCounts[1] < colourCounts[2]):
-		indexToUse = 1
-	pass
-
-	if (colourCounts[2] < colourCounts[1]) and (colourCounts[2] < colourCounts[0]):
-		indexToUse = 2
-	pass
-
-	arrayOfLeastColour = []
-	for x in range(0,30):
-		if colourList[x] == indexToUse+1:
-			arrayOfLeastColour.append(x)
-		pass
-	pass
-
-	print(arrayOfLeastColour)
-
-	starShapedPolygons = []
-
-	for x in range(0,colourCounts[indexToUse]):
-		currentVertex = arrayOfLeastColour[x]
-
-
-		starShapedPolygonVertexList = []
-
-		
-
-		for y in range(0,30):
-			isConnected = graph[currentVertex][y]
-
-			if isConnected == 1:
-				starShapedPolygonVertexList.append(y)
-			pass
-
-			if currentVertex == y:
-				starShapedPolygonVertexList.append(y)
-			pass
-
-		pass
-		starShapedPolygons.append(starShapedPolygonVertexList)
-
-	pass
-
-	return starShapedPolygons
-
-# setupVars()
-# starShapedPolygons = createPolygons()
-
 def isPointInShape(polygon, vertices, x, y):
 	angle = 0.0
 
@@ -235,7 +43,8 @@ def isPointInShape(polygon, vertices, x, y):
 # Doesn't deal with when gradient is infinite (line 242)
 def createInequality(poly, vertices, x, y, prob):
 	# Want i t slightly bigger than epsilon
-	epsilon = 0.000000001
+	epsilon = 0.0000000001
+	equal_epsilon = 0.0000000001
 	p1_a = []
 	p2_a = []
 	midpoint_a = []
@@ -250,7 +59,7 @@ def createInequality(poly, vertices, x, y, prob):
 		c = 0
 		normal = 1
 		gradient = 0
-		if (p1[0] - p2[0]) == 0:
+		if abs(p1[0] - p2[0]) < equal_epsilon:
 			normal = 0
 			pass
 		else:
@@ -276,10 +85,11 @@ def createInequality(poly, vertices, x, y, prob):
 		# For 'normal' gradient
 		p3 = [midpoint[0],midpoint[1]+epsilon]
 
-		
+		# if poly == [5,6,7] and abs(p1[0]-0.70710678) < 0.1:
+		# 	pdb.set_trace()
 		# For infinity gradient
 		# IMPORTANT ORDER OF CHECKS MATTER
-		if (p1[0] - p2[0]) == 0:
+		if abs(p1[0] - p2[0]) < equal_epsilon:
 			p3 = [midpoint[0]+epsilon, midpoint[1]]
 		# For zero gradient
 		elif gradient == 0:
@@ -316,7 +126,7 @@ def createInequality(poly, vertices, x, y, prob):
 
 		# Old Kinda works but not really
 		# if isInShape:
-		# 	if (p1[0] - p2[0]) == 0:
+		# 	if abs(p1[0] - p2[0]) < equal_epsilon:
 		# 		# This is flipped
 		# 		prob += x <= p1[0]
 		# 	elif gradient == 0:
@@ -326,7 +136,7 @@ def createInequality(poly, vertices, x, y, prob):
 		# 	else:
 		# 		prob += y - (gradient*x) >= c
 		# else:
-		# 	if (p1[0] - p2[0]) == 0:
+		# 	if abs(p1[0] - p2[0]) < equal_epsilon:
 		# 		# This is flipped
 		# 		prob += x >= p1[0]
 		# 	elif gradient == 0:
@@ -337,7 +147,7 @@ def createInequality(poly, vertices, x, y, prob):
 		# 		prob += y - (gradient*x) <= c
 
 		if isInShape:
-			if (p1[0] - p2[0]) == 0:
+			if abs(p1[0] - p2[0]) < equal_epsilon:
 				prob += x >= p1[0]
 			elif gradient == 0:
 				prob += y >= p1[1]
@@ -346,7 +156,7 @@ def createInequality(poly, vertices, x, y, prob):
 			else:
 				prob += y >= (gradient*x) + c
 		else:
-			if (p1[0] - p2[0]) == 0:
+			if abs(p1[0] - p2[0]) < equal_epsilon:
 				prob += x <= p1[0]
 			elif gradient == 0:
 				prob += y <= p1[1]
