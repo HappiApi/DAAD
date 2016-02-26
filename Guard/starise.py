@@ -173,10 +173,11 @@ def createInequality(poly, vertices, x, y, prob):
 		normal_a.append(normal)
 		gradient_a.append(gradient)
 		c_a.append(c)
-	prob.solve()
+	status = prob.solve()
 	# pdb.set_trace()
 	if abs(pulp.value(x)) == 3000 or abs(pulp.value(y)) == 3000:
 		print("Problem")
+		print(status)
 		print([pulp.value(x), pulp.value(y)])
 		print(prob)
 		print("poly", poly)
@@ -189,7 +190,9 @@ def createInequality(poly, vertices, x, y, prob):
 		print("gradient", gradient_a)
 		print("c", c_a)
 
-	return [pulp.value(x), pulp.value(y)]
+	# print("Status")
+	# print(status)
+	return (status,[pulp.value(x), pulp.value(y)])
 
 
 # for x in range(0,len(starShapedPolygons)):
@@ -222,6 +225,6 @@ def kernel(polygon, vertices):
 def kernels(polygons, vertices):
 	positions = []
 	for polygon in polygons:
-		positions.append(kernel(polygon, vertices))
+		positions.append(kernel(polygon, vertices)[1])
 	return positions
 

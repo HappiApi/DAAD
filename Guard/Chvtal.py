@@ -22,14 +22,14 @@ import starise
 # Get polygons 
 polygons = json.loads(parse.getJSON('guards.pol.txt'))
 
+def ccw_segments(points_array):
+	length = len(points_array) -1
+	ret = [ [x, x+1] for x in range(length)]
+	ret.append([length, 0])
+	return ret
+
 #triangulate and returns dict for 'original' and 'tri' (triangulated) polygons
 def triangulate(points_array):
-
-	def ccw_segments(points_array):
-		length = len(points_array) -1
-		ret = [ [x, x+1] for x in range(length)]
-		ret.append([length, 0])
-		return ret
 
 	input_dict = dict(vertices=np.array(points_array), segments=ccw_segments(points_array))
 	tri = triangle.triangulate(input_dict, 'p')
@@ -146,62 +146,67 @@ def getGuards(polygon_no):
 	return positions
 
 def getGuardsk(polygon_no):
-	positions = []
-	data = triangulate(polygons[str(polygon_no)])
-	vertices = data['tri']['vertices']
-	colours = get_colour(data)
-	min_c = get_min_colour(colours)
-	stars = get_stars(data)
-	star_polygons = star_poly_array(stars, vertices)
-	# print(stars)
-	# print(star_polygons)
-	# print(vertices)
-	# print(min_c)
-	adj = adj_matrix(data)
-	# print(adj[24])
-	# print(adj[33])
-	# print(adj[60])
-	# pdb.set_trace()
+	isStar = starise.kernel(list(range(len(polygons[str(polygon_no)]))), polygons[str(polygon_no)])
+	print(isStar[0])
+	if isStar[0]+1:
+		return [isStar[1]]
+	else:
+		positions = []
+		data = triangulate(polygons[str(polygon_no)])
+		vertices = data['tri']['vertices']
+		colours = get_colour(data)
+		min_c = get_min_colour(colours)
+		stars = get_stars(data)
+		star_polygons = star_poly_array(stars, vertices)
+		# print(stars)
+		# print(star_polygons)
+		# print(vertices)
+		# print(min_c)
+		adj = adj_matrix(data)
+		# print(adj[24])
+		# print(adj[33])
+		# print(adj[60])
+		# pdb.set_trace()
 
-	def compare(plt, A, B): 
-	    ax1 = plt.subplot(121, aspect='equal')
-	    triangle.plot.plot(ax1, **A)
-	    ax2 = plt.subplot(122, sharex=ax1, sharey=ax1)
-	    triangle.plot.plot(ax2, **B)
-	    return (ax1, ax2)
+		def compare(plt, A, B): 
+		    ax1 = plt.subplot(121, aspect='equal')
+		    triangle.plot.plot(ax1, **A)
+		    ax2 = plt.subplot(122, sharex=ax1, sharey=ax1)
+		    triangle.plot.plot(ax2, **B)
+		    return (ax1, ax2)
 
-	ax1, ax2 = compare(plt, data['original'], data['tri'])
+		ax1, ax2 = compare(plt, data['original'], data['tri'])
 
-	# Colour polygons
-	patches = []
-	for polygon in star_polygons:
-		p = Polygon(polygon, True)
-		patches.append(p)
-	p = PatchCollection(patches, cmap=matplotlib.cm.jet)
-	plt.gca().add_collection(p)
+		# Colour polygons
+		patches = []
+		for polygon in star_polygons:
+			p = Polygon(polygon, True)
+			patches.append(p)
+		p = PatchCollection(patches, cmap=matplotlib.cm.jet)
+		plt.gca().add_collection(p)
 
-	# Label vertex indices
-	for i, v in enumerate(vertices):
-		ax1.text(v[0], v[1], str(i))
+		# Label vertex indices
+		for i, v in enumerate(vertices):
+			ax1.text(v[0], v[1], str(i))
 
-	for c, v in zip(colours, vertices):
-		# if c == min_c:
-			# positions.append(v.tolist())
-		plt.annotate(c, xy=tuple(v), color='darkblue')
+		for c, v in zip(colours, vertices):
+			# if c == min_c:
+				# positions.append(v.tolist())
+			plt.annotate(c, xy=tuple(v), color='darkblue')
 
-	positions = starise.kernels(stars, vertices)
+		positions = starise.kernels(stars, vertices)
 
-	# Plot kernel points
-	ax1.plot(*zip(*positions), marker='^', color='g', ls='')
+		# Plot kernel points
+		ax1.plot(*zip(*positions), marker='^', color='g', ls='')
 
-	# Set colours and config for plot
-	colors = range(0,1000, int(1000/len(patches)))
-	p.set_array(np.array(colors))	
-	plt.subplots_adjust(left=0, bottom=0, right=1, top=1,
-                wspace=0, hspace=0)
-	# plt.show()
-	# pdb.set_trace()
-	return positions
+		# Set colours and config for plot
+		colors = range(0,1000, int(1000/len(patches)))
+		p.set_array(np.array(colors))	
+		plt.subplots_adjust(left=0, bottom=0, right=1, top=1,
+	                wspace=0, hspace=0)
+		# plt.show()
+		# pdb.set_trace()
+		return positions
 
 def show_tri(dic):
 	triangle.plot.compare(plt, dic['original'], dic['tri'])
