@@ -1,5 +1,8 @@
+var filepath = "txt/vis.pol.txt";
+var interactiveMouse = false;
+
 var width = 960,
-    height = 500,
+    height = 600,
     padding = 20;
 
 var x = d3.scale.linear()
@@ -30,7 +33,7 @@ var mouseGuard = null;
 var i = 1;
 
 
-daah.getCheck().then(function(data) {
+daah.getFile(filepath).then(function(data) {
   window.data = data;
   setPolygon(data[i].map);
   setGuards(data[i].guards);
@@ -45,8 +48,10 @@ function mousemove() {
     y.invert(mouse[1])
   ]
   coordsElem.innerHTML = "(" + coords.map(d => d.toPrecision(5)).join(",") + ")";
-  mouseGuard = coords;
-  redraw = true;
+  if (interactiveMouse) {
+    mouseGuard = coords;
+    redraw = true;
+  }
 }
 
 function mouseleave() {
@@ -54,7 +59,7 @@ function mouseleave() {
 }
 
 function click() {
-  if (d3.event.defaultPrevented) return;
+  if (d3.event.defaultPrevented || !interactiveMouse) return;
   guards.push(_.clone(mouseGuard));
 }
 
@@ -90,13 +95,13 @@ function drawGuards(guards) {
   guards.forEach(function(coords) {
     context.beginPath();
     context.arc(x(coords[0]), y(coords[1]), 3, 0, 2*Math.PI);
-    context.fillStyle = "#922";
+    context.fillStyle = "#f94";
     context.fill();
   });
   context.restore();
 }
 
-function drawSightPolygons(guards) {
+function drawVisibilityPolygon(guards) {
   var sightPolygons = guards.map(function(d) {
     return daah.getSightPolygon(d[0], d[1], polygon);
   });
@@ -108,12 +113,12 @@ function drawSightPolygons(guards) {
     drawPolygonPath(polygon);
     context.fillStyle = "red";
     context.fill();
-    polygon.forEach(function(coords) {
-      context.beginPath();
-      context.arc(x(coords[0]), y(coords[1]), 3, 0, 2*Math.PI);
-      context.fillStyle = "#a00";
-      context.fill();
-    });
+    // polygon.forEach(function(coords) {
+    //   context.beginPath();
+    //   context.arc(x(coords[0]), y(coords[1]), 3, 0, 2*Math.PI);
+    //   context.fillStyle = "#a00";
+    //   context.fill();
+    // });
   });
   context.restore();
 }
@@ -154,7 +159,7 @@ function draw() {
     var allGuards = _.clone(guards);
     if (mouseGuard) allGuards.push(mouseGuard);
     drawPolygon(polygon);
-    drawSightPolygons(allGuards);
+    drawVisibilityPolygon(allGuards);
     drawGuards(allGuards);
     redraw = false;
   }
