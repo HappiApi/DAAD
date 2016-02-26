@@ -28,27 +28,15 @@ function parseGaurdsLine(line) {
 function parseCheckLine(line) {
   var pair = removeAllSpaces(line).split(":");
   var a = pair[1].split(";");
-  return [
-    pair[0],
-    {
-      map: parsePoints(a[0]),
-      guards: parsePoints(a[1])
-    }
-  ];
+  var result = {};
+  if (a[0]) result.map = parsePoints(a[0]);
+  if (a[1]) result.guards = parsePoints(a[1]);
+  return [pair[0],result];
 }
 
-// Returns guards.pol into the format { '1': [[0,0], [0,1], [2,2]] }
-daah.getGuards = function() {
-  return daah.getText("txt/guards.pol.txt").then(function(text) {
-    var pairs = text.split("\n").map(parseGaurdsLine);
-    pairs.pop();
-    return _.fromPairs(pairs);
-  });
-};
-
-daah.getCheck = function() {
-  return daah.getText("txt/combo.pol.txt").then(function(text) {
-
+daah.getFile = function(src) {
+  src = src || "txt/guards.pol.txt";
+  return daah.getText(src).then(function(text) {
     var pairs = _.compact(text.split("\n")).map(parseCheckLine);
     return _.fromPairs(pairs);
   });
