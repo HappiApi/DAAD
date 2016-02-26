@@ -6,6 +6,7 @@ import pprint
 import sys
 import math
 import pdb
+import itertools
 # Dependency Libraries
 import triangle
 import triangle.plot
@@ -14,6 +15,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
+from shapely.geometry import Polygon as shapelyPolygon
+from shapely.ops import cascaded_union
 # Written Libraries
 import colour
 import star
@@ -77,13 +80,16 @@ def get_stars(tri_data):
 	stars = star.find_polygons(star.get_chosen_colour_list(colours, get_min_colour(colours)), adj_matrix(tri_data))
 	return stars
 
+def onestar_to_poly(star, vertices):
+	polygon = []
+	for vertex in star:
+		polygon.append(vertices[vertex])
+	return polygon
+
 def star_poly_array(star_data, vertices):
 	polygons = []
-	for poly in star_data:
-		polygon = []
-		for vertex in poly:
-			polygon.append(vertices[vertex])
-		polygons.append(np.array(polygon))
+	for star in star_data:
+		polygons.append(np.array(onestar_to_poly(star, vertices)))
 	return polygons
 
 # Return 2D array of position of guards
@@ -156,7 +162,9 @@ def getGuardsk(polygon_no):
 		vertices = data['tri']['vertices']
 		colours = get_colour(data)
 		min_c = get_min_colour(colours)
+		print(min_c)
 		stars = get_stars(data)
+		print(stars)
 		star_polygons = star_poly_array(stars, vertices)
 		# print(stars)
 		# print(star_polygons)
@@ -204,9 +212,62 @@ def getGuardsk(polygon_no):
 		p.set_array(np.array(colors))	
 		plt.subplots_adjust(left=0, bottom=0, right=1, top=1,
 	                wspace=0, hspace=0)
-		# plt.show()
+		plt.show()
 		# pdb.set_trace()
 		return positions
+
+def getStarAdj(star, stars):
+	adj_poly = set()
+	for vertex in star:
+		adj_point = filter(lambda x: vertex in x, stars)
+		for x in adj_point:
+			adj_poly.add(tuple(x))
+	adj_poly.remove(tuple(star))
+	return adj_poly
+
+d = triangulate(polygons['6'])
+s = get_stars(d)
+v = d['tri']['vertices']
+
+# Find area is better than count triangles, priorities which is best
+# Find combination of combination that covers all area with min subpolys
+def do(star, stars, vertices):
+	maxArea = 0	
+	start_poly = onestar_to_poly(star, vertices)
+	adjTupleSet = getStarAdj(star, stars)
+	# Get all adjacent combination with polyno number of polygons
+	for polyno in range(1,len(adjTupleSet)+1):
+		print("combine with" + str(polyno) + "\n\n")
+		combis = itertools.combinations(adjTupleSet,polyno)
+		for combi in combis:
+			print("new combination")
+			poly = shapelyPolygon(start_poly)
+			# vertices of this combination
+			polyvert = star.copy()
+			for p in combi:
+				# pdb.set_trace()
+				addPoly = shapelyPolygon(onestar_to_poly(p, vertices))
+				poly = cascaded_union([poly, addPoly])
+				for v in p:
+					polyvert.append(v)
+			# pdb.set_trace()
+			polyvert = list(set(polyvert))
+			polyvert.sort()
+			print("Vertices", polyvert)
+			polyvert = onestar_to_poly(polyvert, vertices)
+			print("Area", poly.area)
+			print("Star", starise.kernel(list(range(len(polyvert))), polyvert))
+
+			print("\n")
+
+def combine(polygon_no):
+	data = triangulate(polygons[str(polygon_no)])
+	stars = get_stars(data)
+	vertices = data['tri']['vertices']
+
+	# Some duplication when next star unions with previous star
+	for star in stars:
+		do(star)
 
 def show_tri(dic):
 	triangle.plot.compare(plt, dic['original'], dic['tri'])
