@@ -27,11 +27,16 @@ var context = canvas.node().getContext("2d");
 var polygon = [];
 var guards = [];
 var mouseGuard = null;
+var i = 1;
 
-daah.getGuards().then(function(maps) {
-  window.maps = maps;
-  setPolygon(maps[26]);
+
+daah.getCheck().then(function(data) {
+  window.data = data;
+  setPolygon(data[i].map);
+  setGuards(data[i].guards);
 });
+
+var coordsElem = document.querySelector(".position");
 
 function mousemove() {
   var mouse = d3.mouse(this);
@@ -39,8 +44,9 @@ function mousemove() {
     x.invert(mouse[0]),
     y.invert(mouse[1])
   ]
+  coordsElem.innerHTML = "(" + coords.map(d => d.toPrecision(5)).join(",") + ")";
   mouseGuard = coords;
-  draw();
+  redraw = true;
 }
 
 function mouseleave() {
@@ -53,7 +59,7 @@ function click() {
 }
 
 function zoom() {
-  draw();
+  redraw = true;
 }
 
 function drawPolygon(polygon) {
@@ -102,6 +108,12 @@ function drawSightPolygons(guards) {
     drawPolygonPath(polygon);
     context.fillStyle = "red";
     context.fill();
+    polygon.forEach(function(coords) {
+      context.beginPath();
+      context.arc(x(coords[0]), y(coords[1]), 3, 0, 2*Math.PI);
+      context.fillStyle = "#a00";
+      context.fill();
+    });
   });
   context.restore();
 }
@@ -134,17 +146,26 @@ function evenAspectRatio(xScale, yScale) {
   ]);
 }
 
+var redraw = true;
+
 function draw() {
-  context.clearRect(0, 0, width, height);
-  var allGuards = _.clone(guards);
-  if (mouseGuard) allGuards.push(mouseGuard);
-  drawPolygon(polygon);
-  drawSightPolygons(allGuards);
-  drawGuards(allGuards);
+  if (redraw) {
+    context.clearRect(0, 0, width, height);
+    var allGuards = _.clone(guards);
+    if (mouseGuard) allGuards.push(mouseGuard);
+    drawPolygon(polygon);
+    drawSightPolygons(allGuards);
+    drawGuards(allGuards);
+    redraw = false;
+  }
+  window.requestAnimationFrame(draw);
 }
 
+draw();
+
+
 function setPolygon(newPolygon) {
-  polygon = newPolygon;
+  polygon = newPolygon || [];
   zoomBehavior.translate([0,0]);
   zoomBehavior.scale(1);
   var xs = newPolygon.map(_.first);
@@ -154,5 +175,19 @@ function setPolygon(newPolygon) {
   evenAspectRatio(x, y);
   zoomBehavior.x(x)
   zoomBehavior.y(y);
-  draw();
+  redraw = true;
 }
+
+function setGuards(newGuards) {
+  guards = newGuards || [];
+  redraw = true;
+}
+
+window.addEventListener("keydown", function(event) {
+  if (event.keyCode == 37 || event.keyCode == 39) {
+    i += event.keyCode == 37 ? -1 : 1;
+    setPolygon(data[i].map)
+    setGuards(data[i].guards);
+    event.preventDefault();
+  }
+})

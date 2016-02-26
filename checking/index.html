@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Checking</title>
+    <style>
+
+    </style>
+  </head>
+  <body>
+
+    <script src="jspm_packages/system.js"></script>
+    <script src="config.js"></script>
+    <script>
+
+    if (window.System) {
+      System.import('src/main');
+    } else {
+      document.write("<script src='build.js'><\/script>");
+    }
+
+    </script>
+  </body>
+</html>

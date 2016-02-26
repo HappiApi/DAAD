@@ -1,26 +1,23 @@
-daah.getSightPolygon = function(x, y, polygon) {
+import _ from 'lodash';
+
+export default function(polygon, guard) {
   var segments = convertToSegments(polygon);
-  var sightPolygon = getSightPolygon(x, y, segments);
-  return convertToPolygon(sightPolygon);
+  var sightPolygon = getSightPolygon(guard.x, guard.y, segments);
+  return sightPolygon;
 }
 
 function edges(array) {
   var accumulator = [];
   for (var i = 0; i < array.length - 1; i++) {
-    accumulator.push([array[i], array[i+1]]);
+    accumulator.push({a: array[i], b: array[i+1]});
   }
   return accumulator;
 }
 
 function convertToSegments(polygon) {
-  var p = _.clone(polygon);
-  if (p.length) p.push(polygon[0]);
-  var points = p.map(function(d) {
-    return { x: d[0], y: d[1] };
-  });
-  var segments = edges(points).map(function(d) {
-    return { a: d[0], b: d[1] };
-  });
+  var points = _.cloneDeep(polygon);
+  if(points.length) points.push(_.cloneDeep(polygon[0]));
+  var segments = edges(points);
   return segments;
 }
 
@@ -83,7 +80,7 @@ function getSightPolygon(sightX,sightY, segments){
 		var uniquePoint = uniquePoints[j];
 		var angle = Math.atan2(uniquePoint.y-sightY,uniquePoint.x-sightX);
 		uniquePoint.angle = angle;
-		uniqueAngles.push(angle-0.0000001,angle,angle+0.0000001);
+		uniqueAngles.push(angle-0.00000000001,angle,angle+0.00000000001);
 	}
 
 	// RAYS IN ALL DIRECTIONS
