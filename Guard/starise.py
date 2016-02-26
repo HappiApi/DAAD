@@ -1,5 +1,6 @@
 import pulp
 import math
+import pdb
 
 colourList = [1, 2, 3, 2, 1, 2, 3, 1, 2, 3, 1, 2, 1, 2, 3, 1, 2, 3, 2, 3, 1, 2, 3, 2, 1, 3, 2, 3, 1, 3]
 
@@ -190,8 +191,8 @@ def createPolygons():
 
 	return starShapedPolygons
 
-setupVars()
-starShapedPolygons = createPolygons()
+# setupVars()
+# starShapedPolygons = createPolygons()
 
 def isPointInShape(polygon, vertices, x, y):
 	angle = 0.0
@@ -233,8 +234,16 @@ def isPointInShape(polygon, vertices, x, y):
 # Adds inequality to problem object
 # Doesn't deal with when gradient is infinite (line 242)
 def createInequality(poly, vertices, x, y, prob):
-	# print(poly)
-	
+	# Want i t slightly bigger than epsilon
+	epsilon = 0.000000001
+	p1_a = []
+	p2_a = []
+	midpoint_a = []
+	p3_a = []
+	isInShape_a = []
+	normal_a = []
+	gradient_a = []
+	c_a = []
 	for q in range(0,len(poly)):
 		p1 = vertices[poly[q%len(poly)]]
 		p2 = vertices[poly[(q+1)%len(poly)]]
@@ -250,8 +259,6 @@ def createInequality(poly, vertices, x, y, prob):
 
 		yGrad = 1
 
-		
-
 		if gradient != 0:
 			normal = -1/gradient
 			pass
@@ -264,14 +271,19 @@ def createInequality(poly, vertices, x, y, prob):
 		# Check which side of line is inside the shape
 		midpoint = [p2[0]+dx/2.0,p2[1]+dy/2.0]
 		# print(midpoint)
-		# 0.1 is to move a tiny bit, too much outside shape
-		p3 = [midpoint[0]+0.1,midpoint[1]+(0.1*normal)]
 
-		if gradient == 0:
-			p3 = [midpoint[0]-0.1, midpoint[1]]
-			pass
-		elif (p1[0] - p2[0]) == 0:
-			p3 = [midpoint[0], midpoint[1]+0.1]
+		# epsilon is to move a tiny bit, too much outside shape
+		# For 'normal' gradient
+		p3 = [midpoint[0],midpoint[1]+epsilon]
+
+		
+		# For infinity gradient
+		# IMPORTANT ORDER OF CHECKS MATTER
+		if (p1[0] - p2[0]) == 0:
+			p3 = [midpoint[0]+epsilon, midpoint[1]]
+		# For zero gradient
+		elif gradient == 0:
+			p3 = [midpoint[0], midpoint[1]+epsilon]
 
 		#y = mx + c
 		#c = y-mx
@@ -285,46 +297,121 @@ def createInequality(poly, vertices, x, y, prob):
 
 
 
+		# if isInShape:
+		# 	if gradient <= 0:
+		# 		prob += y - (gradient * x) >= c
+		# 		pass
+		# 	else:
+		# 		prob += y - (gradient*x) <= c
+		# else:
+		# 	if gradient <= 0:
+		# 		prob += y - (gradient * x) <= c
+		# 		pass
+		# 	else:
+		# 		prob += y - (gradient*x) >= c
+		# pass
+
+		# print([isInShape, gradient])
+		# pdb.set_trace()
+
+		# Old Kinda works but not really
+		# if isInShape:
+		# 	if (p1[0] - p2[0]) == 0:
+		# 		# This is flipped
+		# 		prob += x <= p1[0]
+		# 	elif gradient == 0:
+		# 		prob += y >= p1[1]
+		# 	elif gradient > 0:
+		# 		prob += y - (gradient*x) <= c
+		# 	else:
+		# 		prob += y - (gradient*x) >= c
+		# else:
+		# 	if (p1[0] - p2[0]) == 0:
+		# 		# This is flipped
+		# 		prob += x >= p1[0]
+		# 	elif gradient == 0:
+		# 		prob += y <= p1[1]
+		# 	elif gradient > 0:
+		# 		prob += y - (gradient*x) >= c
+		# 	else:
+		# 		prob += y - (gradient*x) <= c
+
 		if isInShape:
-			if gradient <= 0:
-				prob += y - (gradient * x) >= c
-				pass
+			if (p1[0] - p2[0]) == 0:
+				prob += x >= p1[0]
+			elif gradient == 0:
+				prob += y >= p1[1]
+			elif gradient > 0:
+				prob += y >= (gradient*x) + c
 			else:
-				prob += y - (gradient*x) <= c
+				prob += y >= (gradient*x) + c
 		else:
-			if gradient <= 0:
-				prob += y - (gradient * x) <= c
-				pass
+			if (p1[0] - p2[0]) == 0:
+				prob += x <= p1[0]
+			elif gradient == 0:
+				prob += y <= p1[1]
+			elif gradient > 0:
+				prob += y <= (gradient*x) + c
 			else:
-				prob += y - (gradient*x) >= c
-		pass
+				prob += y <= (gradient*x) + c
 
-		print([isInShape, gradient])
+		p1_a.append(p1)
+		p2_a.append(p2)
+		midpoint_a.append(midpoint)
+		p3_a.append(p3)
+		isInShape_a.append(isInShape)
+		normal_a.append(normal)
+		gradient_a.append(gradient)
+		c_a.append(c)
+	prob.solve()
+	# pdb.set_trace()
+	if abs(pulp.value(x)) == 3000 or abs(pulp.value(y)) == 3000:
+		print("Problem")
+		print([pulp.value(x), pulp.value(y)])
+		print(prob)
+		print("poly", poly)
+		print("p1", p1_a)
+		print("p2", p2_a)
+		print("midpoint", midpoint_a)
+		print("p3", p3_a)
+		print("isInShape", isInShape_a)
+		print("normal", normal_a)
+		print("gradient", gradient_a)
+		print("c", c_a)
+
+	return [pulp.value(x), pulp.value(y)]
 
 
+# for x in range(0,len(starShapedPolygons)):
+# 	#print(starShapedPolygons[x])
 
-for x in range(0,len(starShapedPolygons)):
-	#print(starShapedPolygons[x])
+# 	#isPointInShape(starShapedPolygons[x], 14, 9)
+# 	xG = pulp.LpVariable("x", 0.0, 3000.0)
+# 	yG = pulp.LpVariable("y", 0.0, 3000.0)
+# 	problem = pulp.LpProblem("prob", pulp.LpMaximize)
+# 	createInequality(starShapedPolygons[x], verticesCoordinates, xG, yG, problem)
+# 	status = problem.solve()
+# 	# print(pulp.LpStatus[status])
+# 	print("ANSWER")
+# 	print([pulp.value(xG), pulp.value(yG)])
+# 	# print(problem)
 
-	#isPointInShape(starShapedPolygons[x], 14, 9)
-	xG = pulp.LpVariable("x", 0.0, 3000.0)
-	yG = pulp.LpVariable("y", 0.0, 3000.0)
-	problem = pulp.LpProblem("prob", pulp.LpMaximize)
-	createInequality(starShapedPolygons[x], verticesCoordinates, xG, yG, problem)
-	status = problem.solve()
-	# print(pulp.LpStatus[status])
-	print("ANSWER")
-	print([pulp.value(xG), pulp.value(yG)])
-	# print(problem)
-
-	pass
+# 	pass
 
 def kernel(polygon, vertices):
 	xG = pulp.LpVariable("x", -3000.0, 3000.0)
 	yG = pulp.LpVariable("y", -3000.0, 3000.0)
 	problem = pulp.LpProblem("prob", pulp.LpMaximize)
-	createInequality(polygon, vertices, xG, yG, problem)
-	status = problem.solve()
-	print("ANSWER")
-	print([pulp.value(xG), pulp.value(yG)])
-	print(problem)
+	return createInequality(polygon, vertices, xG, yG, problem)
+	# status = problem.solve()
+	# print("ANSWER")
+	# print([pulp.value(xG), pulp.value(yG)])
+	# print(problem)
+	# return [pulp.value(xG), pulp.value(yG)]
+
+def kernels(polygons, vertices):
+	positions = []
+	for polygon in polygons:
+		positions.append(kernel(polygon, vertices))
+	return positions
+

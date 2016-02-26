@@ -1,3 +1,4 @@
+# combo's : 4, 5, 6, 7, 9, 25
 # Standard Libraries
 import parse
 import json
@@ -16,6 +17,7 @@ from matplotlib.collections import PatchCollection
 # Written Libraries
 import colour
 import star
+import starise
 
 # Get polygons 
 polygons = json.loads(parse.getJSON('guards.pol.txt'))
@@ -93,10 +95,10 @@ def getGuards(polygon_no):
 	min_c = get_min_colour(colours)
 	stars = get_stars(data)
 	star_polygons = star_poly_array(stars, vertices)
-	print(stars)
-	print(star_polygons)
-	print(vertices)
-	print(min_c)
+	# print(stars)
+	# print(star_polygons)
+	# print(vertices)
+	# print(min_c)
 	adj = adj_matrix(data)
 	# print(adj[24])
 	# print(adj[33])
@@ -112,6 +114,7 @@ def getGuards(polygon_no):
 
 	ax1, ax2 = compare(plt, data['original'], data['tri'])
 
+	# Colour polygons
 	patches = []
 	for polygon in star_polygons:
 		p = Polygon(polygon, True)
@@ -119,6 +122,7 @@ def getGuards(polygon_no):
 	p = PatchCollection(patches, cmap=matplotlib.cm.jet)
 	plt.gca().add_collection(p)
 
+	# Label vertex indices
 	for i, v in enumerate(vertices):
 		ax1.text(v[0], v[1], str(i))
 
@@ -127,7 +131,71 @@ def getGuards(polygon_no):
 			positions.append(v.tolist())
 		plt.annotate(c, xy=tuple(v), color='darkblue')
 
-	colors = range(0,100, int(100/len(patches)))
+	# positions = starise.kernels(stars, vertices)
+
+	# Plot kernel points
+	ax1.plot(*zip(*positions), marker='^', color='g', ls='')
+
+	# Set colours and config for plot
+	colors = range(0,1000, int(1000/len(patches)))
+	p.set_array(np.array(colors))	
+	plt.subplots_adjust(left=0, bottom=0, right=1, top=1,
+                wspace=0, hspace=0)
+	plt.show()
+	# pdb.set_trace()
+	return positions
+
+def getGuardsk(polygon_no):
+	positions = []
+	data = triangulate(polygons[str(polygon_no)])
+	vertices = data['tri']['vertices']
+	colours = get_colour(data)
+	min_c = get_min_colour(colours)
+	stars = get_stars(data)
+	star_polygons = star_poly_array(stars, vertices)
+	# print(stars)
+	# print(star_polygons)
+	# print(vertices)
+	# print(min_c)
+	adj = adj_matrix(data)
+	# print(adj[24])
+	# print(adj[33])
+	# print(adj[60])
+	# pdb.set_trace()
+
+	def compare(plt, A, B): 
+	    ax1 = plt.subplot(121, aspect='equal')
+	    triangle.plot.plot(ax1, **A)
+	    ax2 = plt.subplot(122, sharex=ax1, sharey=ax1)
+	    triangle.plot.plot(ax2, **B)
+	    return (ax1, ax2)
+
+	ax1, ax2 = compare(plt, data['original'], data['tri'])
+
+	# Colour polygons
+	patches = []
+	for polygon in star_polygons:
+		p = Polygon(polygon, True)
+		patches.append(p)
+	p = PatchCollection(patches, cmap=matplotlib.cm.jet)
+	plt.gca().add_collection(p)
+
+	# Label vertex indices
+	for i, v in enumerate(vertices):
+		ax1.text(v[0], v[1], str(i))
+
+	for c, v in zip(colours, vertices):
+		# if c == min_c:
+			# positions.append(v.tolist())
+		plt.annotate(c, xy=tuple(v), color='darkblue')
+
+	positions = starise.kernels(stars, vertices)
+
+	# Plot kernel points
+	ax1.plot(*zip(*positions), marker='^', color='g', ls='')
+
+	# Set colours and config for plot
+	colors = range(0,1000, int(1000/len(patches)))
 	p.set_array(np.array(colors))	
 	plt.subplots_adjust(left=0, bottom=0, right=1, top=1,
                 wspace=0, hspace=0)
@@ -145,7 +213,7 @@ def t(polygon_no):
 def output():
 	with open('test3.pol', 'w') as f:
 		for i in range(1,31):
-			s = str(i) + ": " + ', '.join(map(str,getGuards(i))).replace('[','(').replace(']',')')
+			s = str(i) + ": " + ', '.join(map(str,getGuardsk(i))).replace('[','(').replace(']',')')
 			f.write(s+'\n')
 
 
