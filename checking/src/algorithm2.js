@@ -1,5 +1,8 @@
 import polygonBoolean from '2d-polygon-boolean';
+import visibilityPolygon from './visibility.js';
 import _ from 'lodash';
+
+let EPSILON = 0.000006;
 
 // returns if the point is inside the polygon
 // based on:
@@ -78,7 +81,7 @@ function filterInterestingPolygons(polygon, interesting_polygons) {
 // Helper function for pointLiesOnLine that checks
 // if the point falls within the correct interval
 function checkIfPointIsBetweenLine(line, point, dx, dy) {
-  if (abs(dx) >= abs(dy)) {
+  if (Math.abs(dx) >= Math.abs(dy)) {
     return dx > 0 ?
       line[0].x <= point.x && point.x <= line[1].x :
       line[1].x <= point.x && point.x <= line[0].x;
@@ -134,29 +137,46 @@ function findPointFromAngleDist(point, angle, distance) {
   return {x, y};
 }
 
-// TODO: Get rid of this
 // Returns a random point inside of a polygon
-function findPointInPolygon(polygon) {
-  let vertex = polygon[0];
-  let distance = 0.000001; // epsilon
-  let angle = 0;
-  let angleIncrement = (Math.PI * 2) / 100;
-  for(let j = 0; j < 100; j++) {
-    let point = findPointFromAngleDist(vertex, angle, distance);
-    if(!pointInPolygon(polygon, point)) {
-      return point;
-    }
-    angle += angleIncrement;
+function findPointInPolygon(polygon, line, epsilon) {
+  let mnormal = 0;
+  let lnormal = (line[1].y - line[0].y)/(line[1].x - line[0].x);
+  if(lnormal !== Infinity && lnormal !== -Infinity) mnormal = -1 / lnormal;
+  if(mnormal !== Infinity && mnormal !== -Infinity) mnormal = 0;
+  let midpoint = {x: (line[1].x + line[0].x)/2, y: (line[1].y + line[0].y)/2};
+  let point = {x: null, y: null};
+  if(line[0].y > line[1].y) {
+    point.x = midpoint.x + epsilon;
+    point.y = mnormal(point.x - midpoint.x) + midpoint.y;
+  } else if(line[1].y > line[0].y) {
+    point.x = midpoint.x - epsilon;
+    point.y = mnormal(point.x - midpoint.x) + midpoint.y;
+  } else if(line[0].x < line[1].x){
+    point.x = midpoint.x;
+    point.y = midpoint.y + epsilon;
+  } else {
+    point.x = midpoint.x;
+    point.y = midpoint.y - epsilon;
   }
-  return null;
+  return point;
+}
+
+// Checks if point1 or point2 comes first, returns the correct
+// line
+function findLineInPolygon(polygon, point1, point2) {
+  for(let i = 0; i < polygon.length; i++) {
+    if(polygon[i].x == point1.x && polygon[i].y == point1.y) return [point1, point2];
+    if(polygon[i].x == point2.x && polygon[i].y == point2.y) return [point2, point2];
+  }
 }
 
 // Decides which polygon is not in the visibility
-function decidePolygon(polygon, poly1, poly2) {
-  let point1 = findPointInPolygon(poly1);
-  if(pointInPolygon(polygon, point1)) return poly1;
-  return poly2;
+function decidePolygon(polygon, poly1, poly2, line) {
+  let point = findPointInPolygon(polygon, line, EPSILON);
+  if(pointInPolygon(poly1, point)) return poly2;
+  return poly1;
 }
+
 
 // Constructs a new polygon that is interesting
 function constructPolygon(polygon, visibility_polygon, ray, point) {
@@ -186,15 +206,18 @@ function constructPolygon(polygon, visibility_polygon, ray, point) {
       }
     }
   }
-  return decidePolygon(visibility_polygon, firstPolygon, secondPolygon);
+  let tempLine = findLineInPolygon(visibility_polygon, intersectingPoint, point);
+  return decidePolygon(visibility_polygon, firstPolygon, secondPolygon, tempLine);
 }
 
-// Get s set of new interesing polygons
+// Gets a set of new interesing polygons
 function checkIfCuts(polygon, visibility_polygon, guard) {
+  debugger;
   let rays = constructRays(visibility_polygon, guard);
   let new_polygons = [];
   for(let i = 0; i < rays.length; i++) {
-    for(let j = 0; j < polygon.length; j++) {
+    debugger;
+    for(var j = 0; j < polygon.length; j++) {
       if(checkEndOfLines(rays[i], polygon[j])) continue;
       if(pointLiesOnLine(rays[i], polygon[j])) {
         let pol = constructPolygon(polygon, visibility_polygon, rays[i], polygon[i]);
@@ -283,6 +306,7 @@ function checkIntersections(interesting_polygons, new_polygons) {
 // then it checks if it can cut any of the existing polygons
 // into a smaller part
 function cutPolygons(polygon, interesting_polygons, visibility_polygon, guard) {
+  debugger;
   let new_polygons = checkIfCuts(polygon, visibility_polygon, guard);
   new_polygons = filterNewPolygons(polygon, new_polygons);
   let temp = checkIfSubsets(interesting_polygons, new_polygons);
@@ -305,25 +329,27 @@ function checkIfPointIsSeen(visibility_polygons, point) {
 function doSampling(interesting_polygons, visibility_polygons) {
   for(let i = 0; i < interesting_polygons.length; i++) {
     for(let j = 0; j < interesting_polygons[i].length; j++) {
-      // TODO: find points
+      let b = (j + 1) % interesting_polygons[i].length;
+      let line = [interesting_polygons[i][j], interesting_polygons[i][b]];
+      let point = findPointInPolygon(polygon, line, EPSILON);
+      if(!checkIfPointIsSeen(visibility_polygons, point)) return point;
     }
   }
+  return null;
 }
 
 // Actual algorithm, yaay
-function algorithm(polygon, guards) {
-  polygon = _.map(polygon, a => ({x: a[0], y: a[1], seen: false}));
-  guards = _.map(guards, a => ({x: a[0], y: a[1]}));
+export default function algorithm(polygon, guards) {
+  polygon = _.map(polygon, a => ({x: a.x, y: a.y, seen: false}));
   let visibility_polygons = [];
   let interesting_polygons = [];
 
   for(let i = 0; i < guards.length; i++) {
-    let visibility_polygon = visibilityPolygon(polygon, guards.x);
+    let visibility_polygon = visibilityPolygon(polygon, guards[i]);
     visibility_polygons.push(visibility_polygon);
     polygon = markAsVisited(polygon, visibility_polygon);
     interesting_polygons = filterInterestingPolygons(polygon, interesting_polygons);
     interesting_polygons = cutPolygons(polygon, interesting_polygons, visibility_polygon, guards[i]);
   }
-
-  doSampling(interesting_polygons);
+  return doSampling(interesting_polygons);
 }
