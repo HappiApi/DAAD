@@ -134,7 +134,7 @@ function checkIfPointIsSeen(polygon, polygons, point) {
     return true;
   }
   for(let i = 0; i < polygons.length; i++) {
-    if(pointInPolygon(polygon[i], point)) {
+    if(pointInPolygon(polygons[i], point)) {
       return true;
     }
   }
